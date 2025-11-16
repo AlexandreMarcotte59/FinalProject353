@@ -1,5 +1,6 @@
 <?php
 // MemberLogin.php
+//http://localhost/FinalProject353/MemberLogin.php
 
 // --- Configuration and Connection - Connects to concorida DB
 define('DB_HOST', 'mvc353.encs.concordia.ca');
