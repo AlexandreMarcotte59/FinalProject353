@@ -62,6 +62,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             if ($status === 200) {
                 $_SESSION['message'] = "Login successful!";
+                $data = json_decode($response, true);
+                $_SESSION['user_id'] = $data['user_id'];
             } else {
                 $error = "Login failed. Server returned status code $status.";
             }

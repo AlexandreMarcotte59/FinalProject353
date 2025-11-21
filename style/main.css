@@ -1,36 +1,4 @@
-<?php
-$is_member = true;
-?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Home</title>
-    <script>
-        document.querySelectorAll("[data-dialog]").forEach(btn => {
-            btn.addEventListener("click", () => {        
-                const dialog = document.querySelector(`#${ btn.dataset.dialog }`);   
-                dialog.showModal();                
-                dialog.querySelector(".closeDialog").addEventListener("click", () => dialog.close());            
-            });
-        });
-    function test(){
-        <?php if ($is_member): ?> 
-    	//alert("test");        
-        const dialog = document.querySelector(`#profileFeatures`);   
-        dialog.showModal();
-        dialog.querySelector(".closeDialog").addEventListener("click", () => dialog.close()); 
-      	<?php else: ?>
-    	//alert("You are not signed in. You have no access to profile features.");
-        const dialog = document.querySelector(`#dialogMessage`);   
-        dialog.showModal();
-        dialog.querySelector(".closeDialog").addEventListener("click", () => dialog.close()); 
-      	<?php endif; ?>
-       return false;
-    } 
-    </script>
-
-    <style>
-    	:root{
+:root{
         --bkg-page-clr: #f0eae4ff;
         --bkg-container-clr: #f7e8c8ff;
         --border-clr: #fdbf8cff;
@@ -138,15 +106,3 @@ $is_member = true;
         backdrop-filter: blur(2px);
         background: hsl(0 0 0 / 50%);
         }
-    </style>
-</head>
-<body>
-
-    <div class="modal-container">
-        <form class="search-form" method="POST" action="index.php">
-            <input type="text" name="searchquery" placeholder="Enter text title or author..." required>
-            <button type="submit">Search</button>
-        </form>
-    </div>
-</body>
-</html>
