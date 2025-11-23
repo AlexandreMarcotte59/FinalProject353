@@ -143,12 +143,15 @@ CREATE TABLE Vote (
 //-------------------------
 CREATE TABLE InboxMessages (
     message_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_from INT,
-    user_to INT,
+    sender_id INT NOT NULL,
+    recipient_id INT NOT NULL,
     subject VARCHAR(255),
-    message TEXT,
-    FOREIGN KEY (user_from) REFERENCES Members(user_id),
-    FOREIGN KEY (user_to) REFERENCES Members(user_id)
+    body VARCHAR(2048),
+    sent_datetime DATETIME DEFAULT CURRENT_TIMESTAMP,
+    is_read BOOLEAN DEFAULT FALSE,
+    system_generated BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (sender_id) REFERENCES Members(user_id),
+    FOREIGN KEY (recipient_id) REFERENCES Members(user_id)
 );
 
 //-------------------------
