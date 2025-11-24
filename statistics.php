@@ -1,7 +1,10 @@
 <?php
-$servername="localhost"; $username="your_encs_username"; 
-$password="your_encs_mysql_password"; $dbname="your_encs_username_db";
-$conn=new mysqli($servername,$username,$password,$dbname);
+
+$servername="mvc353.encs.concordia.ca"; 
+$username="mvc353_2"; 
+$password="firstsound58"; 
+$dbname="mvc353_2";
+
 if($conn->connect_error) die("Connection failed: ".$conn->connect_error);
 ?>
 <!DOCTYPE html><html><body>
@@ -22,3 +25,4 @@ $conn->close();
 ?>
 </table>
 </body></html>
+
