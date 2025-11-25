@@ -24,7 +24,8 @@ try {
 }
 
 // Start session to handle user messages - MADE by Chatgpt so I commented it out for the tutorial's solution
-//session_start();
+session_start();
+$error = '';
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -38,38 +39,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = "Please enter a valid email address.";
     } else {
-        // Prepare data for POST request
-        $postData = [
-            'member_name' => $member_name,
-            'email' => $email,
-            'token' => $token
-        ];
-
-        // Send data to the target URL
-        $url = "https://mvc353.encs.concordia.ca/MemberLogin";
-
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-
-        $response = curl_exec($ch);
-
-        if (curl_errno($ch)) {
-            $error = "Connection error: " . curl_error($ch);
-        } else {
-            $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            if ($status === 200) {
+        try {
+            //Creates a prepared SQL statement with three positional placeholders (?) to safely query the Members table for a row where name_or_username, recovery_email, and verification_token match.
+            $stmt = $pdo->prepare(
+                'SELECT user_id
+                 FROM Members
+                 WHERE name_or_username = ? AND recovery_email = ? AND verification_token = ?
+                 LIMIT 1'
+            );
+            //Binds the values (in that order) to the placeholders and runs the query. Using prepared statements prevents SQL injection.
+            $stmt->execute([$member_name, $email, $token]);
+            //Fetches the first matching row as an associative array (or returns false if no row found).
+            $row = $stmt->fetch();
+            //If a row was returned (match found), it sets a session message ("Login successful!") and stores the member’s user_id in $_SESSION['user_id'] for later use.
+            if ($row) { 
                 $_SESSION['message'] = "Login successful!";
-                $data = json_decode($response, true);
-                $_SESSION['user_id'] = $data['user_id'];
+                $_SESSION['user_id'] = $row['user_id'];
             } else {
-                $error = "Login failed. Server returned status code $status.";
+                $error = "Invalid name/email/token combination.";
             }
+        } catch (PDOException $e) {
+            $error = "Database error: " . $e->getMessage();
         }
-
-        curl_close($ch);
     }
 }
 ?>
