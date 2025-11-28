@@ -134,7 +134,7 @@ CREATE TABLE InboxMessages (
     body VARCHAR(2048),
     sent_datetime DATETIME DEFAULT CURRENT_TIMESTAMP,
     is_read BOOLEAN DEFAULT FALSE,
-    system_generated BOOLEAN DEFAULT FALSE,
+    is_system_message BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (sender_id) REFERENCES Members(user_id),
     FOREIGN KEY (recipient_id) REFERENCES Members(user_id)
 );
