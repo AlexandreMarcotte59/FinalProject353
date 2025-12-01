@@ -86,6 +86,10 @@ $pendingRequests = $stmt_pending->fetchAll(PDO::FETCH_ASSOC);
     </style>
 </head>
 <body>
+    <div class="navbar">
+        <a href="Home.php" class="btn btn-secondary">← Back to Home</a>
+    </div>
+
 
     <div class="data-container">
 
