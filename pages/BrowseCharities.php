@@ -1,5 +1,5 @@
 <?php
-include "./db.php";
+include_once("../database/db.php");
 
 // Handle content queries
 $user_id = $_SESSION['user_id'];

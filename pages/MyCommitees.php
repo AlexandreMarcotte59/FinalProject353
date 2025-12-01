@@ -1,9 +1,5 @@
 <?php
-session_start();
-
-// Adjust this include path to match your project structure
-// If this file is in components/, "../components/db.php" might be needed instead
-require_once "../components/db.php"; 
+include_once("../database/db.php");
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../login.php");

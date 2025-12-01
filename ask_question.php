@@ -1,14 +1,5 @@
 <?php
-
-$servername="mvc353.encs.concordia.ca"; 
-$username="mvc353_2"; 
-$password="firstsound58"; 
-$dbname="mvc353_2";
-
-$conn=new mysqli($servername,$username,$password,$dbname);
-if($conn->connect_error) die("Connection failed: ".$conn->connect_error);
-
-session_start();
+include_once("database/db.php");
 
 ?>
 <!DOCTYPE html>

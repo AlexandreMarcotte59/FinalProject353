@@ -1,9 +1,9 @@
 <?php
-include "./db.php";
+include_once("../database/db.php");
 
 // Handle content queries
 $user_id = $_SESSION['user_id'];
-$stmt_query_contents = $pdo->prepare("SELECT * FROM texts WHERE member_author = ?");
+$stmt_query_contents = $pdo->prepare("SELECT * FROM Texts WHERE member_author = ?");
 $stmt_query_contents->execute([$user_id]);
 $tuples = $pdo->query($stmt_query_contents)->fetch(PDO::FETCH_ASSOC);
 ?>

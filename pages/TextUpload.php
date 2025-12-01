@@ -204,20 +204,21 @@ $result = $stmt->get_result();
         .msg.ok { color: green; }
         .msg.err { color: red; }
         form.inline { display: inline; }
-        .back-btn {
-            display: inline-block;
-            padding: 10px 18px;
-            background: #007bff;
-            color: white;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: bold;
-            margin-top: 10px;
-            margin-bottom: 25px;
-        }
-        .back-btn:hover {
-            background: #0056b3;
-        }
+.back-btn {
+    display: inline-block;
+    padding: 10px 18px;
+    background: #007bff;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    margin-top: 10px;
+    margin-bottom: 25px;
+}
+.back-btn:hover {
+    background: #0056b3;
+}
+
     </style>
 </head>
 <body>

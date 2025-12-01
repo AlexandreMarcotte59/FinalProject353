@@ -1,0 +1,29 @@
+<div>
+    <h2>Text Viewer</h2>
+    <div class="text-viewer">
+        <?php if ($selected_text):?>
+            <h3><?php echo htmlspecialchars($selected_text["title"]); ?></h3>
+            <p>
+                <strong>Author:</strong> <?php echo htmlspecialchars($selected_text["author"]); ?><br>
+                <strong>Member Author:</strong> <?php echo htmlspecialchars($selected_text["member_author"]); ?><br>
+                <strong>Popularity:</strong> <?php echo (int)$selected_text["popularity"]; ?><br>
+                <strong>Date Published:</strong> <?php echo htmlspecialchars($selected_text["date_published"]); ?>
+            </p>
+
+             <?php
+                if (!$file || !is_file($file)) {
+                    echo "<p class='info-msg'>File not found on server.</p>";
+                } else {
+                    if ($ext === "txt") {
+                        $content = file_get_contents($filepath);
+                        echo "<pre>" . htmlspecialchars($content) . "</pre>";
+                    } elseif ($ext === "pdf") {
+                        echo "<iframe src='" . htmlspecialchars($filepath) . "#toolbar=1' width='100%' height='500px'></iframe>";
+                    } else {
+                        echo "<p class='info-msg'>Unsupported file type.</p>";
+                    }
+                }
+            ?>
+            <?php endif ?>
+</div>
+</div>

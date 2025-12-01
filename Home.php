@@ -1,5 +1,5 @@
 <?php
-include "./components/db.php";
+include_once("database/db.php");
 
 // Handle Texts queries
 $sql_query_popular = "select * from texts order by popularity desc limit 20";
@@ -15,6 +15,8 @@ if (!isset($_SESSION['user_id'])) {
     $stmt_query_user = $pdo->prepare("SELECT * FROM members WHERE user_id = ?");
     $stmt_query_user->execute([$user_id]);
     $user_tuple = $pdo->query($stmt_query_user)->fetch(PDO::FETCH_ASSOC);
+
+    $_SESSION["download_limit"] = $user_tuple["download_limit"];
 } 
 
 ?>
