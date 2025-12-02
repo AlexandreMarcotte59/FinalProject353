@@ -1,7 +1,6 @@
 <?php
 include_once( "../database/db.php");
 
-// Handle content queries
 $t_id = $_POST['id'];
 $stmt_query_contents = $pdo->prepare("SELECT * FROM Texts WHERE text_id = ?");
 $stmt_query_contents->execute([$t_id]);
@@ -11,6 +10,12 @@ if ($selected_text && !empty($selected_text["filename"])) {
         $file = $ROOTPATH . $filepath;
         $ext  = strtolower(pathinfo($selected_text["filename"], PATHINFO_EXTENSION));
 }
+
+
+$stmt_text_chats = $pdo->prepare("SELECT * FROM TextComments WHERE text_id = ?");
+$stmt_text_chats->execute([$t_id]);
+$chats = $stmt_text_chats->fetch(PDO::FETCH_ASSOC);
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
