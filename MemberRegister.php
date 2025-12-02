@@ -93,13 +93,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $is_admin = ($admin_secret === 'firstsound58') ? 1 : 0;
 
             // insert into Members (auto-increment user_id)
+            // TEMPORARY WORKAROUND: manually assign user_id because the column is not AUTO_INCREMENT.
+            // TODO: Fix the schema so Members.user_id is AUTO_INCREMENT and remove this manual increment.
+            $stmt = $pdo->query("SELECT COALESCE(MAX(user_id), 0) AS maxid FROM Members FOR UPDATE");
+            $row = $stmt->fetch();
+            $next_user_id = ((int)($row['maxid'] ?? 0)) + 1;
+
             $sql = "INSERT INTO Members
-                    (recovery_email, name_or_username, organization, address, verification_token, referral_code, is_admin)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)";
+                    (user_id, recovery_email, name_or_username, organization, address, verification_token, referral_code, is_admin)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $pdo->prepare($sql);
-            $stmt->execute([$email, $name, $org, $addr, $token, $ref, $is_admin]);
-            // optionally get the new member primary key:
-            $new_member_id = (int)$pdo->lastInsertId();
+            $stmt->execute([$next_user_id, $email, $name, $org, $addr, $token, $ref, $is_admin]);
+            // store the new member primary key we manually assigned
+            $new_member_id = $next_user_id;
 
             $pdo->commit();
 

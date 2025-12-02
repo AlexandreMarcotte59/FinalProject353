@@ -40,24 +40,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = "Please enter a valid email address.";
     } else {
         try {
-            //Creates a prepared SQL statement with three positional placeholders (?) to safely query the Members table for a row where name_or_username, recovery_email, and verification_token match.
+            // select stored token and admin flag (do not require token match in SQL)
             $stmt = $pdo->prepare(
-                'SELECT user_id, is_admin
+                'SELECT user_id, verification_token, is_admin
                  FROM Members
-                 WHERE name_or_username = ? AND recovery_email = ? AND verification_token = ?
+                 WHERE name_or_username = ? AND recovery_email = ?
                  LIMIT 1'
             );
-            //Binds the values (in that order) to the placeholders and runs the query. Using prepared statements prevents SQL injection.
-            $stmt->execute([$member_name, $email, $token]);
-            //Fetches the first matching row as an associative array (or returns false if no row found).
+            $stmt->execute([$member_name, $email]);
             $row = $stmt->fetch();
-            //If a row was returned (match found), it sets a session message ("Login successful!") and stores the member’s user_id in $_SESSION['user_id'] for later use.
+
             if ($row) {
-                $_SESSION['message'] = "Login successful!";
-                $_SESSION['user_id'] = $row['user_id'];
-                $_SESSION['is_admin'] = !empty($row['is_admin']) ? true : false;
-                if (!empty($row['is_admin'])) {
-                    $_SESSION['admin_message'] = "You are logged in as an administrator.";
+                // Normalize: remove all whitespace (spaces, tabs, newlines) so format differences won't break matching
+                $stored = preg_replace('/\s+/', '', (string)$row['verification_token']);
+                $input  = preg_replace('/\s+/', '', (string)$token);
+
+                if (hash_equals($stored, $input)) {
+                    $_SESSION['message'] = "Login successful!";
+                    $_SESSION['user_id'] = $row['user_id'];
+                    $_SESSION['is_admin'] = !empty($row['is_admin']);
+                    if (!empty($row['is_admin'])) {
+                        $_SESSION['admin_message'] = "You are logged in as an administrator.";
+                    }
+                } else {
+                    $error = "Invalid name/email/token combination.";
                 }
             } else {
                 $error = "Invalid name/email/token combination.";
