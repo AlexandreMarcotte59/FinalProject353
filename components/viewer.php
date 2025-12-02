@@ -1,6 +1,4 @@
-<div>
-    <h2>Text Viewer</h2>
-    <div class="text-viewer">
+<div class="text-viewer">
         <?php if ($selected_text):?>
             <h3><?php echo htmlspecialchars($selected_text["title"]); ?></h3>
             <p>
@@ -15,7 +13,7 @@
                     echo "<p class='info-msg'>File not found on server.</p>";
                 } else {
                     if ($ext === "txt") {
-                        $content = file_get_contents($filepath);
+                        $content = file_get_contents($file);
                         echo "<pre>" . htmlspecialchars($content) . "</pre>";
                     } elseif ($ext === "pdf") {
                         echo "<iframe src='" . htmlspecialchars($filepath) . "#toolbar=1' width='100%' height='500px'></iframe>";
@@ -25,5 +23,4 @@
                 }
             ?>
             <?php endif ?>
-</div>
 </div>

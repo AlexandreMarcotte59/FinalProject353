@@ -29,7 +29,7 @@
         border: solid 3px var(--border-clr);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         width: 400px;
-        margin: 10vh auto;
+        margin: 10vh auto 5vh auto;
         display: flex;
         flex-direction: column;
     }
@@ -37,6 +37,7 @@
     .main-container .bar {
         display: flex;
         flex-direction: row !important;
+        justify-content: center;
     }
 
     h1 {
@@ -45,30 +46,55 @@
         margin: 0 auto 20px auto;
         max-width: 80%;
     }
-
-    .data-container {
+    .main-container {height: 100dvh;}
+    .data-container, .home-container, .card-container {
         width: 80vw;
         display: flex;
         flex-direction: row;
+        flex-wrap: wrap;
         gap: 1vw;
     }
+    .card-container { justify-content: center; }
 
-    .data-container .card form {
+    .card form {
         margin: 0 !important;
         padding: 0 !important;
     }
-
-    .data-container .card {
-        background-color: sandybrown;
-        width: fit-content;
-        max-width: 30%;
-        border-radius: 20px;
-        padding: 10px 20px;
-    }
-
-    .data-container .card:hover {
-        transform: scale(1.1);
+    .card:hover {
+        transform: scale(1.05);
         filter: saturate(50%);
+    }
+    .card {
+            background-color: sandybrown;
+            width: fit-content;
+            max-width: 30%;
+            min-width: 25%;
+            border-radius: 20px;
+            padding: 10px 20px;
+            min-height: fit-content;
+    }
+    .home-container{
+            overflow: hidden auto;
+            max-height: 60%;
+            padding: 0 1dvw;
+            align-items: flex-start;
+            align-content: flex-start;
+            scrollbar-width: none;
+            flex-wrap: nowrap;
+            flex-direction: column !important;
+    }
+    .home-container h4{ margin:0;}
+    .home-container .card {
+            background-color: sandybrown;
+            width: fit-content;
+            max-width: 30%;
+            border-radius: 20px;
+            padding: 10px 20px;
+            max-height: fit-content;
+    }
+    .home-container .card:hover {
+            transform: scale(1.05);
+            filter: saturate(50%);
     }
     .inbox-container {
         margin: 10vh auto;
@@ -79,6 +105,28 @@
         background-color: white;
     }
 
+    .charity-container, .faq-container { height: 100%; width: 80%; }
+    .charity-container {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 2vw;
+            padding: 10vh 0;
+    }
+    .charity-container .card {
+            background-color: sandybrown;
+            border-radius: 8px;
+            width: 30dvw;
+            height: fit-content;
+            padding: 1dvh;
+    }
+    .card-footer { justify-content: center; display: flex; flex-direction: row;}
+    .card button[type="submit"] {
+            background-color: white;
+            border-radius: 8px;
+            border: none;
+            padding: 8px;
+    }.card button[type="submit"]:hover { box-shadow: 2px 2px 2px black;}
 
     .navbar {
         position: fixed;
@@ -129,11 +177,6 @@
     .navbar #hamburger {
         font-size: 40px;
         color: var(--clr-pop);
-    }
-
-    .search-form {
-        display: flex;
-        margin: 20px auto;
     }
 
     .search-form input[type="text"] {
@@ -207,6 +250,8 @@
         margin: 20px auto;
         gap: 1vh;
     }
+    .viewer:has(pre) {overflow-y: scroll; width: 100%; }
+    .viewer pre { overflow: hidden !important; height: fit-content;}
     .chatbox input{ background-color: wheat; width: 100%; border-radius: 8px; border: none;}
     .chat-viewer {
         height: 100%;
@@ -215,7 +260,6 @@
         gap: 10px;
         justify-content: space-between;
     }
-
     .chat-history {
         height: 80dvh;
         background-color: wheat;

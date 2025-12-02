@@ -150,14 +150,10 @@ $texts = $stmt->fetchAll(PDO::FETCH_ASSOC);
                            href="../download.php?file=<?php echo urlencode($file_web_path); ?>&id=<?php echo (int)$selected_text['text_id']; ?>">
                             ⬇️ Download Text (<?php echo strtoupper($ext); ?>)
                         </a>
-                    <?php endif; ?>
-                </div>
 
-            <?php else: ?>
-                <p class="info-msg">
-                    Select a text from the list (or via link) to view and download it.
-                </p>
-            <?php endif; ?>
+                    <?php endif; ?>
+                </div>              
+            <?php endif; ?>  
         </div>
     </div>
 
