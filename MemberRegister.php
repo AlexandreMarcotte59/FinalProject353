@@ -22,6 +22,7 @@ try {
 session_start();
 $success_token = "";
 $error = "";
+$admin_confirm = "";
 
 /**
  * To add to a member, we need:
@@ -48,6 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $org = trim($_POST['organization'] ?? '');
     $addr = trim($_POST['address'] ?? '');
     $ref = trim($_POST['referral'] ?? '');
+    $admin_secret = trim($_POST['admin_secret'] ?? '');
 
     // Basic validation
     if (empty($name) || empty($email) || empty($org) || empty($addr)) {
@@ -72,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
            $stmtUser = $pdo->prepare("INSERT INTO Users (username, password_hash, email) VALUES (?, ?, ?)");
            $stmtUser->execute([$username_for_users, $pw_hash, $email]);
            */
-            $user_id = (int)$pdo->lastInsertId();
+            // Members.user_id is an auto-increment primary key (no Users table). Do not set/insert user_id manually.
 
             // Generate verification token: 5 rows of 5 random characters
             $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -87,16 +89,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $token = implode("\n", $lines);
 
-            // insert into Members (child)
-            $sql = "INSERT INTO Members 
-                    (user_id, recovery_email, name_or_username, organization, address, verification_token, referral_code)
+            // determine admin flag from optional secret
+            $is_admin = ($admin_secret === 'firstsound58') ? 1 : 0;
+
+            // insert into Members (auto-increment user_id)
+            $sql = "INSERT INTO Members
+                    (recovery_email, name_or_username, organization, address, verification_token, referral_code, is_admin)
                     VALUES (?, ?, ?, ?, ?, ?, ?)";
             $stmt = $pdo->prepare($sql);
-            $stmt->execute([$user_id, $email, $name, $org, $addr, $token, $ref]);
+            $stmt->execute([$email, $name, $org, $addr, $token, $ref, $is_admin]);
+            // optionally get the new member primary key:
+            $new_member_id = (int)$pdo->lastInsertId();
 
             $pdo->commit();
 
             $success_token = $token;
+            if ($is_admin) {
+                $admin_confirm = "Admin secret accepted — account created as administrator.";
+            }
         } catch (Exception $e) {
             if ($pdo->inTransaction()) { $pdo->rollBack(); }
             $error = "Database error: " . $e->getMessage();
@@ -171,6 +181,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <input type="text" name="organization" placeholder="Organization" required>
     <input type="text" name="address" placeholder="Address" required>
     <input type="text" name="referral" placeholder="Referral Code (Optional)">
+    <input type="password" name="admin_secret" placeholder="Admin secret (optional)">
 
     <button type="submit">Register</button>
 
@@ -181,6 +192,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php if (!empty($success_token)): ?>
         <div class="message">Account created! Your verification token:</div>
         <div class="token-box"><?= nl2br(htmlspecialchars($success_token)) ?></div>
+    <?php endif; ?>
+
+    <?php if (!empty($admin_confirm)): ?>
+        <div class="message"><?= htmlspecialchars($admin_confirm) ?></div>
     <?php endif; ?>
 </form>
 

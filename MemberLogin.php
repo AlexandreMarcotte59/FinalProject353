@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             //Creates a prepared SQL statement with three positional placeholders (?) to safely query the Members table for a row where name_or_username, recovery_email, and verification_token match.
             $stmt = $pdo->prepare(
-                'SELECT user_id
+                'SELECT user_id, is_admin
                  FROM Members
                  WHERE name_or_username = ? AND recovery_email = ? AND verification_token = ?
                  LIMIT 1'
@@ -52,9 +52,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             //Fetches the first matching row as an associative array (or returns false if no row found).
             $row = $stmt->fetch();
             //If a row was returned (match found), it sets a session message ("Login successful!") and stores the member’s user_id in $_SESSION['user_id'] for later use.
-            if ($row) { 
+            if ($row) {
                 $_SESSION['message'] = "Login successful!";
                 $_SESSION['user_id'] = $row['user_id'];
+                $_SESSION['is_admin'] = !empty($row['is_admin']) ? true : false;
+                if (!empty($row['is_admin'])) {
+                    $_SESSION['admin_message'] = "You are logged in as an administrator.";
+                }
             } else {
                 $error = "Invalid name/email/token combination.";
             }
@@ -137,6 +141,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="error"><?= htmlspecialchars($error) ?></div>
     <?php elseif (!empty($_SESSION['message'])): ?>
         <div class="message"><?= htmlspecialchars($_SESSION['message']) ?></div>
+        <?php if (!empty($_SESSION['admin_message'])): ?>
+            <div class="message"><?= htmlspecialchars($_SESSION['admin_message']) ?></div>
+            <?php unset($_SESSION['admin_message']); ?>
+        <?php endif; ?>
         <?php unset($_SESSION['message']); ?>
     <?php endif; ?>
 </form>
