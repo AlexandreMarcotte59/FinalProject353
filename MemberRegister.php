@@ -56,23 +56,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = "Invalid email address.";
     } else {
 
-        // Generate secure token
-        $token = bin2hex(random_bytes(16)); // 32-char token
-
+   
         // --- Create Users row and use its auto-increment id ---
         // Pretty much we need a userID for the member table, so we need to make a user first
         try {
             $pdo->beginTransaction();
-
+            //DEV: NO LONGER NEED TO MAKE A USER
+            /**
             // build a username and a random password hash (you can adjust as needed)
             $username_for_users = preg_replace('/\s+/', '_', strtolower($name));
             $random_pw = bin2hex(random_bytes(8));
             $pw_hash = password_hash($random_pw, PASSWORD_DEFAULT);
 
-            // insert into Users (parent)
-            $stmtUser = $pdo->prepare("INSERT INTO Users (username, password_hash, email) VALUES (?, ?, ?)");
-            $stmtUser->execute([$username_for_users, $pw_hash, $email]);
+           insert into Users (parent)
+           $stmtUser = $pdo->prepare("INSERT INTO Users (username, password_hash, email) VALUES (?, ?, ?)");
+           $stmtUser->execute([$username_for_users, $pw_hash, $email]);
+           */
             $user_id = (int)$pdo->lastInsertId();
+
+            // Generate verification token: 5 rows of 5 random characters
+            $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            $lines = [];
+            $maxIndex = strlen($chars) - 1;
+            for ($i = 0; $i < 5; $i++) {
+                $line = '';
+                for ($j = 0; $j < 5; $j++) {
+                    $line .= $chars[random_int(0, $maxIndex)];
+                }
+                $lines[] = $line;
+            }
+            $token = implode("\n", $lines);
 
             // insert into Members (child)
             $sql = "INSERT INTO Members 
@@ -167,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <?php if (!empty($success_token)): ?>
         <div class="message">Account created! Your verification token:</div>
-        <div class="token-box"><?= htmlspecialchars($success_token) ?></div>
+        <div class="token-box"><?= nl2br(htmlspecialchars($success_token)) ?></div>
     <?php endif; ?>
 </form>
 
