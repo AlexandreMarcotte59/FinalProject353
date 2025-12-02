@@ -40,10 +40,10 @@ if (!isset($_SESSION['user_id'])) {
         // Compute allowed downloads
         $base_window = 31;
         $bonusday = floor($total / 100); // 3100 in 20 years = 31
-        $bonusnum = floor($recent_dono / 10); // 10 in last month = 1
+        $bonusnum = floor($recent_dono / 10); // 30 in last month = 3
         $effective_window = max($base_window - $bonusday, 1);
         if ($effective_window == 1) {
-            $downloads_allowed = 1 + max($bonusday - $base_window, 0) + max($bonusnum - ($base_window - 1), 0);
+            $downloads_allowed = 1 + max($bonusday - $base_window, 0) + max($bonusnum, 0);
         } else {
             $downloads_allowed = 1;
         }
