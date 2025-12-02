@@ -1,30 +1,5 @@
 <?php
-// MemberLogin.php
-//http://localhost/FinalProject353/MemberLogin.php
-
-// --- Configuration and Connection - Connects to concorida DB
-define('DB_HOST', 'mvc353.encs.concordia.ca');
-define('DB_USER', 'mvc353_2'); // Your MySQL username
-define('DB_PASS', 'firstsound58'); // Your MySQL password
-define('DB_NAME', 'mvc353_2'); // The name of your database
-
-
-
-$dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4';
-$options = [
-    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::ATTR_EMULATE_PREPARES => false,
-];
-
-try {
-     $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
-} catch (\PDOException $e) {
-     die("ERROR: Could not connect to the database. " . $e->getMessage());
-}
-
-session_start();
-$error = '';
+include_once("../database/db.php");
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -72,6 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
 ?>
 
 <!DOCTYPE html>

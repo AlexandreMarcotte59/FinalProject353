@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-$_SESSION["download_count"] = 0;
 $ROOTPATH = $_SERVER['DOCUMENT_ROOT'];
 
 define('DB_HOST', 'mvc353.encs.concordia.ca');
@@ -34,4 +33,6 @@ try {
     echo "Other Error: " . $e->getMessage();
     die("Connection failed: " . $conn->connect_error);
 }
+
+
 ?>

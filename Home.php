@@ -24,6 +24,40 @@ if (!isset($_SESSION['user_id'])) {
         $stmt_query_user = $pdo->prepare("SELECT 1 FROM Members WHERE user_id = ?");
         $stmt_query_user->execute([$user_id]);
         $user_tuple = $stmt_query_user->fetch(PDO::FETCH_ASSOC);
+        
+        // Compute donations
+        $stmt = $pdo->prepare("SELECT SUM(amount) FROM Donations WHERE user_id=?");
+        $stmt->execute([$user_id]);
+        $total = $stmt->fetchColumn();
+        $total = floatval($total);
+
+        
+        $stmtdono = $pdo->prepare("SELECT SUM(amount) FROM Donations WHERE user_id=? AND donation_date >= NOW() - INTERVAL 31 DAY");
+        $stmtdono->execute([$user_id]);
+        $recent_dono = $stmtdono->fetchColumn();
+        $recent_dono = floatval($recent_dono);
+
+        // Compute allowed downloads
+        $base_window = 31;
+        $bonusday = floor($total / 100); // 3100 in 20 years = 31
+        $bonusnum = floor($recent_dono / 10); // 10 in last month = 1
+        $effective_window = max($base_window - $bonusday, 1);
+        if ($effective_window == 1) {
+            $downloads_allowed = 1 + max($bonusday - $base_window, 0) + max($bonusnum - ($base_window - 1), 0);
+        } else {
+            $downloads_allowed = 1;
+        }
+
+        // Count recent downloads
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM Downloads WHERE user_id=? AND download_date >= NOW() - INTERVAL ? DAY");
+        $stmt->execute([$user_id, $effective_window]);
+        $recent = $stmt->fetchColumn();
+
+        if ($recent < $downloads_allowed) {
+            // allow download
+        } else {
+            // deny download
+        }
 }
 
 if (isset($_POST['search'])){
