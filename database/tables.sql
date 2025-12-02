@@ -1,17 +1,13 @@
-//------------------------
-//-- 1. USERS
-//------------------------ 
--- 
--- CREATE TABLE Users (
---     user_id INT AUTO_INCREMENT PRIMARY KEY,
---   username VARCHAR(100) NOT NULL,
---    password_hash VARCHAR(255) NOT NULL,
---   email VARCHAR(255) NOT NULL UNIQUE
---);
 
-//-------------------------
- 2. MEMBERS
-//-------------------------
+
+CREATE TABLE Users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE
+);
+
+
 CREATE TABLE Members (
     user_id INT PRIMARY KEY,
     recovery_email VARCHAR(255),
@@ -25,9 +21,7 @@ CREATE TABLE Members (
     --FOREIGN KEY (user_id) REFERENCES Users(user_id) -- user_id should not be a foreign key
 );
 
-//-------------------------
-3. TEXTS
-//-------------------------
+
 CREATE TABLE Texts (
     text_id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
@@ -38,9 +32,7 @@ CREATE TABLE Texts (
     FOREIGN KEY (member_author) REFERENCES Members(user_id)
 );
 
-//-------------------------
- 4. READERS
-//-------------------------
+
 CREATE TABLE Readers (
     user_id INT,
     text_id INT,
@@ -49,9 +41,15 @@ CREATE TABLE Readers (
     FOREIGN KEY (text_id) REFERENCES Texts(text_id)
 );
 
-//-------------------------
-5. TEXTCOMMENTS
-//-------------------------
+CREATE TABLE Downloads (
+    download_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    text_id INT NOT NULL,
+    download_date DATE DEFAULT CURRENT_DATE,
+    FOREIGN KEY (user_id) REFERENCES Members(user_id),
+    FOREIGN KEY (text_id) REFERENCES Texts(text_id)
+);
+
 CREATE TABLE TextComments (
     comment_id INT AUTO_INCREMENT PRIMARY KEY,
     reader_id INT,
@@ -62,23 +60,22 @@ CREATE TABLE TextComments (
     FOREIGN KEY (text_id) REFERENCES Texts(text_id)
 );
 
-//-------------------------
-6. DONATIONS
-//-------------------------
 CREATE TABLE Donations (
     donation_id INT AUTO_INCREMENT PRIMARY KEY,
-    text_id INT,
-    user_id INT,
-    quantity DECIMAL(10,2),
-    destination VARCHAR(255),
-    date DATE,
+    user_id INT NOT NULL,
+    text_id INT NOT NULL,
+    charity_id INT NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    charity_percent INT NOT NULL,
+    author_percent INT NOT NULL,
+    cfp_percent INT NOT NULL,
+    donation_date DATE DEFAULT CURRENT_DATE,
+    FOREIGN KEY (user_id) REFERENCES Members(user_id),
     FOREIGN KEY (text_id) REFERENCES Texts(text_id),
-    FOREIGN KEY (user_id) REFERENCES Members(user_id)
+    FOREIGN KEY (charity_id) REFERENCES Charities(charity_id)
 );
 
-//-------------------------
-7. QUESTIONS
-//-------------------------
+
 CREATE TABLE Questions (
     question_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
@@ -86,9 +83,7 @@ CREATE TABLE Questions (
     FOREIGN KEY (user_id) REFERENCES Members(user_id)
 );
 
-//-------------------------
- 8. ANSWERS
-//-------------------------
+
 CREATE TABLE Answers (
     answer_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
@@ -98,17 +93,13 @@ CREATE TABLE Answers (
     FOREIGN KEY (question_id) REFERENCES Questions(question_id)
 );
 
-//-------------------------
-9. COMMITTEE
-//-------------------------
+
 CREATE TABLE Committee (
     committee_id INT AUTO_INCREMENT PRIMARY KEY,
     subject VARCHAR(255)
 );
 
-///-------------------------
-10. COMMITTEEVOLUNTEERS
-//-------------------------
+
 CREATE TABLE CommitteeVolunteers (
     committee_id INT,
     volunteer_id INT,
@@ -117,9 +108,7 @@ CREATE TABLE CommitteeVolunteers (
     FOREIGN KEY (volunteer_id) REFERENCES Members(user_id)
 );
 
-//-------------------------
-11. MEMBERAUTHOR
-//-------------------------
+
 CREATE TABLE MemberAuthor (
     user_id INT,
     text_id INT,
@@ -128,9 +117,7 @@ CREATE TABLE MemberAuthor (
     FOREIGN KEY (text_id) REFERENCES Texts(text_id)
 );
 
-//-------------------------
-12. VOTE
-//-------------------------
+
 CREATE TABLE Vote (
     vote_id INT AUTO_INCREMENT PRIMARY KEY,
     plagiarized_item INT,
@@ -138,9 +125,7 @@ CREATE TABLE Vote (
     FOREIGN KEY (plagiarized_item) REFERENCES Texts(text_id)
 );
 
-//-------------------------
-13. INBOXMESSAGES
-//-------------------------
+
 CREATE TABLE InboxMessages (
     message_id INT AUTO_INCREMENT PRIMARY KEY,
     sender_id INT NOT NULL,
@@ -149,18 +134,35 @@ CREATE TABLE InboxMessages (
     body VARCHAR(2048),
     sent_datetime DATETIME DEFAULT CURRENT_TIMESTAMP,
     is_read BOOLEAN DEFAULT FALSE,
-    system_generated BOOLEAN DEFAULT FALSE,
+    is_system_message BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (sender_id) REFERENCES Members(user_id),
     FOREIGN KEY (recipient_id) REFERENCES Members(user_id)
 );
 
-//-------------------------
-14. STATISTICS
-//-------------------------
+
 CREATE TABLE Statistics (
     stat_id INT AUTO_INCREMENT PRIMARY KEY,
     description VARCHAR(255),
     year INT,
     value INT
 );
+
+CREATE TABLE Charities (
+    charity_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    status ENUM('approved', 'pending') DEFAULT 'approved'
+);
+
+CREATE TABLE SuggestedCharities (
+    suggestion_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+    FOREIGN KEY (user_id) REFERENCES Members(user_id)
+);
+
+
+
 
