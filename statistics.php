@@ -1,11 +1,14 @@
 <?php
+// ----- DATABASE CONNECTION -----
+$servername = "mvc353.encs.concordia.ca"; 
+$username   = "mvc353_2"; 
+$password   = "firstsound58"; 
+$dbname     = "mvc353_2";
 
-$servername="mvc353.encs.concordia.ca"; 
-$username="mvc353_2"; 
-$password="firstsound58"; 
-$dbname="mvc353_2";
-
-if($conn->connect_error) die("Connection failed: ".$conn->connect_error);
+$conn = new mysqli($servername, $username, $password, $dbname);
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -84,108 +87,224 @@ if($conn->connect_error) die("Connection failed: ".$conn->connect_error);
 
 <h1>Record of CFP Statistics</h1>
 
+<!-- 1. Growth and Usage of Content in CFP (Uploads per Year) -->
 <div class="card">
-<h2>Growth and Usage of Content (Uploads per Year)</h2>
-<table>
-<tr><th>Year</th><th>New Texts Uploaded</th></tr>
-<?php
-$sql = "SELECT YEAR(upload_date) AS year, COUNT(*) AS total FROM texts GROUP BY YEAR(upload_date) ORDER BY year";
-$res = $conn->query($sql);
-while ($row = $res->fetch_assoc()) {
-    echo "<tr><td>{$row['year']}</td><td>{$row['total']}</td></tr>";
-}
-?>
-</table>
+    <h2>Growth and Usage of Content in CFP (Uploads per Year)</h2>
+    <table>
+        <tr><th>Year</th><th>New Texts Uploaded</th></tr>
+        <?php
+        $sql = "SELECT YEAR(date_published) AS year, COUNT(*) AS total
+                FROM Texts
+                WHERE date_published IS NOT NULL
+                GROUP BY YEAR(date_published)
+                ORDER BY year";
+        $res = $conn->query($sql);
+
+        if (!$res) {
+            echo "<tr><td colspan='2'>SQL error: " . htmlspecialchars($conn->error) . "</td></tr>";
+        } elseif ($res->num_rows === 0) {
+            echo "<tr><td colspan='2'>No data available.</td></tr>";
+        } else {
+            while ($row = $res->fetch_assoc()) {
+                echo "<tr>
+                        <td>" . htmlspecialchars($row['year']) . "</td>
+                        <td>" . htmlspecialchars($row['total']) . "</td>
+                      </tr>";
+            }
+        }
+        ?>
+    </table>
 </div>
 
+<!-- 2. Annual Access to CFP’s Content -->
 <div class="card">
-<h2>Annual Access to CFP Content</h2>
-<table>
-<tr><th>Year</th><th>Total Downloads</th></tr>
-<?php
-$sql = "SELECT YEAR(download_date) AS year, COUNT(*) AS downloads FROM downloads GROUP BY YEAR(download_date) ORDER BY year";
-$res = $conn->query($sql);
-while ($row = $res->fetch_assoc()) {
-    echo "<tr><td>{$row['year']}</td><td>{$row['downloads']}</td></tr>";
-}
-?>
-</table>
+    <h2>Annual Access to CFP’s Content</h2>
+    <table>
+        <tr><th>Year</th><th>Total Downloads</th></tr>
+        <?php
+        $sql = "SELECT YEAR(download_date) AS year, COUNT(*) AS downloads
+                FROM Downloads
+                GROUP BY YEAR(download_date)
+                ORDER BY year";
+        $res = $conn->query($sql);
+
+        if (!$res) {
+            echo "<tr><td colspan='2'>SQL error: " . htmlspecialchars($conn->error) . "</td></tr>";
+        } elseif ($res->num_rows === 0) {
+            echo "<tr><td colspan='2'>No data available.</td></tr>";
+        } else {
+            while ($row = $res->fetch_assoc()) {
+                echo "<tr>
+                        <td>" . htmlspecialchars($row['year']) . "</td>
+                        <td>" . htmlspecialchars($row['downloads']) . "</td>
+                      </tr>";
+            }
+        }
+        ?>
+    </table>
 </div>
 
+<!-- 3. Annual Access of CFP’s Content by Countries/Organizations -->
 <div class="card">
-<h2>Annual Access by Countries</h2>
-<table>
-<tr><th>Country</th><th>Total Downloads</th></tr>
-<?php
-$sql = "SELECT user_country, COUNT(*) AS total FROM downloads GROUP BY user_country ORDER BY total DESC";
-$res = $conn->query($sql);
-while ($row = $res->fetch_assoc()) {
-    echo "<tr><td>{$row['user_country']}</td><td>{$row['total']}</td></tr>";
-}
-?>
-</table>
+    <h2>Annual Access of CFP’s Content by Countries / Organizations</h2>
+    <table>
+        <tr><th>Organization (Proxy for Country)</th><th>Total Downloads</th></tr>
+        <?php
+        $sql = "SELECT 
+                    COALESCE(m.organization, 'Unknown') AS org,
+                    COUNT(*) AS total
+                FROM Downloads d
+                LEFT JOIN Members m ON d.user_id = m.user_id
+                GROUP BY org
+                ORDER BY total DESC";
+        $res = $conn->query($sql);
+
+        if (!$res) {
+            echo "<tr><td colspan='2'>SQL error: " . htmlspecialchars($conn->error) . "</td></tr>";
+        } elseif ($res->num_rows === 0) {
+            echo "<tr><td colspan='2'>No data available.</td></tr>";
+        } else {
+            while ($row = $res->fetch_assoc()) {
+                echo "<tr>
+                        <td>" . htmlspecialchars($row['org']) . "</td>
+                        <td>" . htmlspecialchars($row['total']) . "</td>
+                      </tr>";
+            }
+        }
+        ?>
+    </table>
 </div>
 
-
+<!-- 4. Annual Access of CFP’s Content by Authors -->
 <div class="card">
-<h2>Annual Access by Authors</h2>
-<table>
-<tr><th>Author</th><th>Total Downloads</th></tr>
-<?php
-$sql = "SELECT u.name AS author, COUNT(d.id) AS downloads
-        FROM users u
-        JOIN texts t ON u.id = t.author_id
-        LEFT JOIN downloads d ON t.id = d.text_id
-        GROUP BY u.id
-        ORDER BY downloads DESC";
-$res = $conn->query($sql);
-while ($row = $res->fetch_assoc()) {
-    echo "<tr><td>{$row['author']}</td><td>{$row['downloads']}</td></tr>";
-}
-?>
-</table>
+    <h2>Annual Access of CFP’s Content by Authors</h2>
+    <table>
+        <tr><th>Year</th><th>Author</th><th>Total Downloads</th></tr>
+        <?php
+        $sql = "SELECT 
+                    YEAR(d.download_date) AS year,
+                    COALESCE(m.name_or_username, t.author, 'Unknown') AS author_name,
+                    COUNT(d.download_id) AS downloads
+                FROM Downloads d
+                JOIN Texts t ON d.text_id = t.text_id
+                LEFT JOIN Members m ON t.member_author = m.user_id
+                GROUP BY year, author_name
+                ORDER BY year, downloads DESC";
+        $res = $conn->query($sql);
+
+        if (!$res) {
+            echo "<tr><td colspan='3'>SQL error: " . htmlspecialchars($conn->error) . "</td></tr>";
+        } elseif ($res->num_rows === 0) {
+            echo "<tr><td colspan='3'>No data available.</td></tr>";
+        } else {
+            while ($row = $res->fetch_assoc()) {
+                echo "<tr>
+                        <td>" . htmlspecialchars($row['year']) . "</td>
+                        <td>" . htmlspecialchars($row['author_name']) . "</td>
+                        <td>" . htmlspecialchars($row['downloads']) . "</td>
+                      </tr>";
+            }
+        }
+        ?>
+    </table>
 </div>
 
+<!-- 5. Most Downloaded CFP Authors – Ranked -->
 <div class="card">
-<h2>Most Downloaded Authors (Ranked)</h2>
-<table>
-<tr><th>Author</th><th>Total Downloads</th></tr>
-<?php
-$sql = "SELECT u.name AS author, COUNT(d.id) AS downloads
-        FROM users u
-        JOIN texts t ON u.id = t.author_id
-        LEFT JOIN downloads d ON d.text_id = t.id
-        GROUP BY u.id
-        ORDER BY downloads DESC LIMIT 10";
-$res = $conn->query($sql);
-while ($row = $res->fetch_assoc()) {
-    echo "<tr><td>{$row['author']}</td><td>{$row['downloads']}</td></tr>";
-}
-?>
-</table>
+    <h2>Most Downloaded CFP Authors – Ranked</h2>
+    <table>
+        <tr><th>Author</th><th>Total Downloads</th></tr>
+        <?php
+        $sql = "SELECT 
+                    COALESCE(m.name_or_username, t.author, 'Unknown') AS author_name,
+                    COUNT(d.download_id) AS downloads
+                FROM Texts t
+                LEFT JOIN Members m ON t.member_author = m.user_id
+                LEFT JOIN Downloads d ON t.text_id = d.text_id
+                GROUP BY author_name
+                ORDER BY downloads DESC
+                LIMIT 10";
+        $res = $conn->query($sql);
+
+        if (!$res) {
+            echo "<tr><td colspan='2'>SQL error: " . htmlspecialchars($conn->error) . "</td></tr>";
+        } elseif ($res->num_rows === 0) {
+            echo "<tr><td colspan='2'>No data available.</td></tr>";
+        } else {
+            while ($row = $res->fetch_assoc()) {
+                echo "<tr>
+                        <td>" . htmlspecialchars($row['author_name']) . "</td>
+                        <td>" . htmlspecialchars($row['downloads']) . "</td>
+                      </tr>";
+            }
+        }
+        ?>
+    </table>
 </div>
 
-
+<!-- 6. Most Downloaded Titles -->
 <div class="card">
-<h2>Most Downloaded Titles</h2>
-<table>
-<tr><th>Title</th><th>Total Downloads</th></tr>
-<?php
-$sql = "SELECT t.title, COUNT(d.id) AS downloads
-        FROM texts t
-        LEFT JOIN downloads d ON t.id = d.text_id
-        GROUP BY t.id
-        ORDER BY downloads DESC
-        LIMIT 10";
-$res = $conn->query($sql);
-while ($row = $res->fetch_assoc()) {
-    echo "<tr><td>{$row['title']}</td><td>{$row['downloads']}</td></tr>";
-}
-?>
-</table>
+    <h2>Most Downloaded Titles</h2>
+    <table>
+        <tr><th>Title</th><th>Total Downloads</th></tr>
+        <?php
+        $sql = "SELECT 
+                    t.title,
+                    COUNT(d.download_id) AS downloads
+                FROM Texts t
+                LEFT JOIN Downloads d ON t.text_id = d.text_id
+                GROUP BY t.text_id, t.title
+                ORDER BY downloads DESC
+                LIMIT 10";
+        $res = $conn->query($sql);
+
+        if (!$res) {
+            echo "<tr><td colspan='2'>SQL error: " . htmlspecialchars($conn->error) . "</td></tr>";
+        } elseif ($res->num_rows === 0) {
+            echo "<tr><td colspan='2'>No data available.</td></tr>";
+        } else {
+            while ($row = $res->fetch_assoc()) {
+                echo "<tr>
+                        <td>" . htmlspecialchars($row['title']) . "</td>
+                        <td>" . htmlspecialchars($row['downloads']) . "</td>
+                      </tr>";
+            }
+        }
+        ?>
+    </table>
+</div>
+
+<!-- 7. Most Viewed Articles (using Texts.popularity) -->
+<div class="card">
+    <h2>Most Viewed Articles</h2>
+    <table>
+        <tr><th>Title</th><th>Views (Popularity)</th></tr>
+        <?php
+        $sql = "SELECT title, popularity
+                FROM Texts
+                ORDER BY popularity DESC
+                LIMIT 10";
+        $res = $conn->query($sql);
+
+        if (!$res) {
+            echo "<tr><td colspan='2'>SQL error: " . htmlspecialchars($conn->error) . "</td></tr>";
+        } elseif ($res->num_rows === 0) {
+            echo "<tr><td colspan='2'>No data available.</td></tr>";
+        } else {
+            while ($row = $res->fetch_assoc()) {
+                echo "<tr>
+                        <td>" . htmlspecialchars($row['title']) . "</td>
+                        <td>" . htmlspecialchars($row['popularity']) . "</td>
+                      </tr>";
+            }
+        }
+        ?>
+    </table>
 </div>
 
 </body>
 </html>
 
-<?php $conn->close(); ?>
+<?php
+$conn->close();
+?>
