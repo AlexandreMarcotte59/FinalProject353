@@ -2,7 +2,6 @@
 session_start();
 
 $_SESSION["download_count"] = 0;
-$_SESSION['chat'] = [];
 $ROOTPATH = $_SERVER['DOCUMENT_ROOT'];
 
 define('DB_HOST', 'mvc353.encs.concordia.ca');

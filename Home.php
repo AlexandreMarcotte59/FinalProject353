@@ -2,9 +2,9 @@
 include_once("database/db.php");
 
 // Handle Texts queries
-$sql_query_popular = "select * from texts order by popularity desc limit 20";
+$sql_query_popular = "select * from Texts order by popularity desc limit 10";
 $result = $pdo->query($sql_query_popular);
-$top20 = $result->fetchAll(PDO::FETCH_ASSOC);
+$top10 = $result->fetchAll(PDO::FETCH_ASSOC);
 
 if (!isset($_SESSION['user_id'])) {
     //die("Not logged in");
@@ -19,6 +19,15 @@ if (!isset($_SESSION['user_id'])) {
     $_SESSION["download_limit"] = $user_tuple["download_limit"];
 } 
 
+if (isset($_POST['search'])) {
+    $sql_query_search = $pdo->prepare("SELECT * FROM Texts WHERE title LIKE CONCAT('%', ?, '%') order by title");
+    $sql_query_search->execute([$_POST['search']]);
+    $search_result= $sql_query_search->fetchAll(PDO::FETCH_ASSOC);
+}
+
+
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -32,20 +41,26 @@ if (!isset($_SESSION['user_id'])) {
                 dialog.querySelector(".closeDialog").addEventListener("click", () => dialog.close());            
             });
         });
-        function test(){
-        <?php if ($is_member): ?> 
-    	//alert("test");        
-        const dialog = document.querySelector(`#profileFeatures`);   
-        dialog.showModal();
-        dialog.querySelector(".closeDialog").addEventListener("click", () => dialog.close()); 
-      	<?php else: ?>
-    	//alert("You are not signed in. You have no access to profile features.");
-        const dialog = document.querySelector(`#dialogMessage`);   
-        dialog.showModal();
-        dialog.querySelector(".closeDialog").addEventListener("click", () => dialog.close()); 
-      	<?php endif; ?>
-       return false;
-        } 
+        function ModalHandler(){
+        		const dialog = document.querySelector(`#dialogMessage`);   
+		dialog.showModal();
+		dialog.querySelector(".closeDialog").addEventListener("click", () => dialog.close()); 
+      	       return false;
+	}
+	function SubmitCard(card) {
+	    const form = card.querySelector('form');
+	    if (form) {
+		    form.submit();
+	    }
+	}
+    
+	function Logout() {
+	    <?php 
+            session_unset();  
+            session_destroy();
+            header('Location: /')
+        ?>
+	}
     </script>
 
     <link rel="stylesheet" href="./style/main.css">
@@ -53,12 +68,12 @@ if (!isset($_SESSION['user_id'])) {
 <body>
         <div class="navbar">
         	<div class="left-side">
-            	<a id="hamburger" onclick="test()">≡</a>
+            	<a id="hamburger" onclick="ModalHandler()">≡</a>
         		<a id="?"></a>
             </div>
         	<div class="right-side">
                 <?php if ($is_member): ?>                
-                <a id="login">Log Out</a>
+                <a id="login" onclick="Logout()">Log Out</a>
             	<?php else: ?>
             	<a id="login" >Log In</a>
                 <a id="signup">Sign Up</a>
@@ -68,16 +83,31 @@ if (!isset($_SESSION['user_id'])) {
 
     <div class="main-container">
         <h1>CopyForward Publishing</h1>
-        <form class="search-form" method="POST" action="index.php">
-            <input type="text" name="searchquery" placeholder="Enter text title or author..." required>
+        <form class="search-form" method="POST" action="Home.php">
+            <input type="text" name="search" placeholder="Enter text title or author..." required>
             <button type="submit">Search</button>
         </form>
         <div class="data-container">
-            <table>
-            <?php  foreach ($top20 as $row): ?>
-                <tr><?= $row ?></tr>
+            <?php  foreach ($search_result as $res): ?>
+                <div class="card" onclick="SubmitCard(this)">
+                    <form method="POST" action="pages/TextViewer.php">
+                        <!--<input value="1" type="hidden">-->
+                        <h3><?= $res["title"] ?></h3>
+                        <p>Author: <?= $res["author"] ?></p>
+                        <p>Year: <?= $res["date_published"] ?></p>
+                    </form>
+                </div>
             <?php endforeach; ?>
-            </table>
+            <?php  foreach ($top10 as $row): ?>
+                <div class="card" onclick="SubmitCard(this)">
+                    <form method="POST" action="pages/TextViewer.php">
+                        <!--<input value="1" type="hidden">-->
+                        <h3><?= $row["title"] ?></h3>
+                        <p>Author: <?= $row["author"] ?></p>
+                        <p>Year: <?= $row["date_published"] ?></p>
+                    </form>
+                </div>
+            <?php endforeach; ?>
         <div>
         <!-- The Modals -->
         <dialog id="dialogMessage">

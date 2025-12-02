@@ -15,7 +15,7 @@ $tuples = $stmt_query_contents->fetch(PDO::FETCH_ASSOC);
 </head>
 <body>
 
-    <div class="data-container">
+    <div class="inbox-container">
         <?php  foreach ($tuples as $msg): ?>
             <form action="MyEmail.php" method="get" style="display:inline-block;" class="mailmessage">
                 <input type="hidden" name="text_id" value="<?= $text['text_id'] ?>">
