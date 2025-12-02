@@ -54,7 +54,9 @@ if (!isset($_SESSION['user_id'])) {
         $recent = $stmt->fetchColumn();
 
         if ($recent < $downloads_allowed) {
-            // allow download
+            $_SESSION['download_count'] = $recent;
+            $_SESSION['downloads_allowed'] = $downloads_allowed;
+            $_SESSION['downloads_window'] = $effective_window;
         } else {
             // deny download
         }

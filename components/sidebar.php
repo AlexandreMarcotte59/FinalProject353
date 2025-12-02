@@ -15,12 +15,11 @@
         <?php endif ?>
         <a href="/pages/FAQ.php">FAQs</a>
         
-        <?php if ($_SESSION["user_id"]): ?>
+        <?php if ($_SESSION["user_id"] && isset($_SESSION["downloads_allowed"])): ?>
         <p>My Download Limit: <?php  
-            echo $_SESSION["download_count"] . " "; 
-            if (isset($_SESSION["download_limit"])) {
-                echo $_SESSION["download_limit"];
-            } else { echo " / 1"; }
+            echo $_SESSION["download_count"] . " of " 
+            . $_SESSION["downloads_allowed"] . " / " 
+            . $_SESSION["downloads_windows"] . "days";
         ?></p>
         <?php endif ?>
 
