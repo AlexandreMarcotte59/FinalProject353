@@ -27,9 +27,8 @@ $selected_text = null;
 $file_web_path = null;   // path used in href for browser
 $file_fs_path  = null;   // path used for is_file() on server
 $ext  = null;
-
-if (isset($_GET['id'])) {
-    $id = (int) $_GET['id'];
+if (isset($_POST['id'])) {
+    $id = (int) $_POST['id'];
 
     // Increment popularity in Texts using text_id
     $stmt = $pdo->prepare("UPDATE Texts SET popularity = popularity + 1 WHERE text_id = ?");
