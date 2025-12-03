@@ -54,7 +54,7 @@
         flex-wrap: wrap;
         gap: 1vw;
     }
-    .card-container { justify-content: center; }
+    .card-container { justify-content: center; padding: 5px !important; }
 
     .card form {
         margin: 0 !important;
