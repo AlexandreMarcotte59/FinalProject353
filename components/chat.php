@@ -1,7 +1,7 @@
 <?php
 if(isset($_POST["comment"])){
-        $stmt_text_chats = $pdo->prepare("INSERT INTO TextComments (text_id, message) VALUES (?, ?)");
-        $stmt_text_chats->execute([$t_id, $_POST["message"]]);
+        $stmt_text_chats = $pdo->prepare("INSERT INTO TextComments (text_id, comment) VALUES (?, ?)");
+        $stmt_text_chats->execute([$t_id, $_POST["comment"]]);
         unset($_POST["comment"]);
 }
 
