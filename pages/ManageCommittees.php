@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     SELECT r.request_id, r.committee_id, r.user_id, r.status,
                            c.created_by
                     FROM CommitteeJoinRequests r
-                    JOIN Committee c ON r.committee_id = c.committee_id
+                    JOIN Committees c ON r.committee_id = c.committee_id
                     WHERE r.request_id = :r AND r.status = 'pending'
                 ");
                 $stmt->execute([':r' => $request_id]);
@@ -130,7 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     SELECT r.request_id, r.committee_id, r.user_id, r.status,
                            c.created_by
                     FROM CommitteeJoinRequests r
-                    JOIN Committee c ON r.committee_id = c.committee_id
+                    JOIN Committees c ON r.committee_id = c.committee_id
                     WHERE r.request_id = :r AND r.status = 'pending'
                 ");
                 $stmt->execute([':r' => $request_id]);
@@ -160,7 +160,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($committee_id > 0) {
             try {
                 $stmt = $pdo->prepare("
-                    SELECT created_by FROM Committee WHERE committee_id = :c
+                    SELECT created_by FROM Committees WHERE committee_id = :c
                 ");
                 $stmt->execute([':c' => $committee_id]);
                 $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -181,7 +181,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ")->execute([':c' => $committee_id]);
 
                     $pdo->prepare("
-                        DELETE FROM Committee WHERE committee_id = :c
+                        DELETE FROM Committees WHERE committee_id = :c
                     ")->execute([':c' => $committee_id]);
 
                     $pdo->commit();
@@ -211,7 +211,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($errors)) {
             try {
                 $stmt = $pdo->prepare("
-                    SELECT created_by FROM Committee WHERE committee_id = :c
+                    SELECT created_by FROM Committees WHERE committee_id = :c
                 ");
                 $stmt->execute([':c' => $committee_id]);
                 $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -222,7 +222,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $errors[] = "You are not allowed to edit this committee.";
                 } else {
                     $stmtUpd = $pdo->prepare("
-                        UPDATE Committee
+                        UPDATE Committees
                         SET subject = :s, purpose = :p
                         WHERE committee_id = :c
                     ");
@@ -251,7 +251,7 @@ $stmtCommittees = $pdo->query("
            c.purpose,
            c.created_by,
            m.name_or_username AS creator_name
-    FROM Committee c
+    FROM Committees c
     JOIN Members m ON c.created_by = m.user_id
     ORDER BY c.committee_id DESC
 ");
@@ -285,7 +285,7 @@ $stmtRequests = $pdo->prepare("
            c.subject
     FROM CommitteeJoinRequests r
     JOIN Members u ON r.user_id = u.user_id
-    JOIN Committee c ON r.committee_id = c.committee_id
+    JOIN Committees c ON r.committee_id = c.committee_id
     WHERE c.created_by = :owner AND r.status = 'pending'
     ORDER BY r.request_date ASC
 ");
@@ -301,7 +301,7 @@ if ($editCommitteeId !== null) {
                c.purpose,
                c.created_by,
                m.name_or_username AS creator_name
-        FROM Committee c
+        FROM Committees c
         JOIN Members m ON c.created_by = m.user_id
         WHERE c.committee_id = :c
     ");
