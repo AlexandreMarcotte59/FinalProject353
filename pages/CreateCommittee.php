@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // 3) Insert into Committee
             $stmtCommittee = $pdo->prepare("
-                INSERT INTO Committee (subject)
+                INSERT INTO Committees (subject)
                 VALUES (:subject)
             ");
             $stmtCommittee->execute([':subject' => $subject]);
