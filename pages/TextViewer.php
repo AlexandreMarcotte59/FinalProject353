@@ -80,8 +80,17 @@ $texts = $stmt->fetchAll(PDO::FETCH_ASSOC);
         .text-viewer:has(iframe), .text-container:has(iframe) { height: 100%; }
         .row-container:has(iframe) .infocard { height: 5dvh; }
         .row-container:has(iframe) .infocard:hover { height: auto !important; }
-        iframe { position: unset !important; width: 100% !important; height: 100% !important; }
-        pre { white-space: pre-wrap; word-wrap: break-word; }
+        iframe { position: unset !important; width: 100% !important; height: 100% !important;}
+        pre { 
+            white-space: pre-wrap; 
+            word-wrap: break-word; 
+            width: fit-content; 
+            margin: 0 auto; 
+            scrollbar-width: none; 
+            background-color: lightgray;
+            border-radius: 8px; 
+            padding: 8px;
+        }
         .home-btn {
             display: inline-block;
             padding: 8px 14px;
