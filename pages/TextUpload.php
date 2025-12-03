@@ -1,9 +1,4 @@
 <?php
-// OPTIONAL: show errors while debugging (remove in production)
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-
 // --- Database connection ---
 // db.php already starts the session, according to your notice
 include_once("../database/db.php");
