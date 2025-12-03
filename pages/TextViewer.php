@@ -130,7 +130,7 @@ $texts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                 <!-- DOWNLOAD SECTION -->
                 <div class="download">
-                    <hr style="margin:20px 0;">
+                    <hr style="margin:5px 0;">
                     <h3>Download</h3>
 
                     <?php if (!$is_member): ?>
