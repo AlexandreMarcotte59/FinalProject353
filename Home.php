@@ -26,13 +26,13 @@ if (!isset($_SESSION['user_id'])) {
         $user_tuple = $stmt_query_user->fetch(PDO::FETCH_ASSOC);
         
         // Compute donations
-        $stmt = $pdo->prepare("SELECT SUM(amount) FROM Donations WHERE user_id=?");
+        $stmt = $pdo->prepare("SELECT SUM(quantity) FROM Donations WHERE user_id=?");
         $stmt->execute([$user_id]);
         $total = $stmt->fetchColumn();
         $total = floatval($total);
 
         
-        $stmtdono = $pdo->prepare("SELECT SUM(amount) FROM Donations WHERE user_id=? AND donation_date >= NOW() - INTERVAL 31 DAY");
+        $stmtdono = $pdo->prepare("SELECT SUM(quantity) FROM Donations WHERE user_id=? AND date >= NOW() - INTERVAL 31 DAY");
         $stmtdono->execute([$user_id]);
         $recent_dono = $stmtdono->fetchColumn();
         $recent_dono = floatval($recent_dono);

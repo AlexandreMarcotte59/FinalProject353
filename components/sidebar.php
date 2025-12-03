@@ -16,10 +16,10 @@
         <a href="/pages/FAQ.php">FAQs</a>
         
         <?php if ($_SESSION["user_id"] && isset($_SESSION["downloads_allowed"])): ?>
-        <p>My Download Limit: <?php  
-            echo $_SESSION["download_count"] . " of " 
-            . $_SESSION["downloads_allowed"] . " / " 
-            . $_SESSION["downloads_windows"] . "days";
+        <p>Download Limit: <?php  
+            echo $_SESSION["download_count"] . " / " 
+            . $_SESSION["downloads_allowed"] . " per " 
+            . $_SESSION["downloads_window"] . "day(s)";
         ?></p>
         <?php endif ?>
 
