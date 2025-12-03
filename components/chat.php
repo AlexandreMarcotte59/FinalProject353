@@ -5,7 +5,7 @@
 </script>
 <div class="chat-viewer">
     <?php if ($selected_text): ?>
-        <div style="padding:5px 15px;border-radius:8px;background-color:hsl(168, 0%, 15%); color:white;">
+        <div class="text-info">
             <h3><?php echo htmlspecialchars($selected_text["title"]); ?></h3>
             <p>
                 <strong>Author:</strong> <?php echo htmlspecialchars($selected_text["author"]); ?><br>
@@ -37,7 +37,7 @@
             <?php endforeach ?>
         <?php endif ?>
     </div>
-    <div>
+    <div class="chat-input">
         <form method="POST" action="" style="display:flex; flex-direction: row;">
             <input type="hidden" name="id" value="<?= $t_id ?>">
             <input type="text" name="comment" placeholder="Comment here..." />
