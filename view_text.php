@@ -1,6 +1,5 @@
 <?php
-session_start();
-include "./components/db.php"; // must set $pdo (PDO connection)
+include_once("../database/db.php");
 
 // ---------------------
 // Check membership
@@ -25,7 +24,8 @@ if (isset($_SESSION['user_id'])) {
 // If a specific text is requested via ?id=
 // ---------------------
 $selected_text = null;
-$file = null;
+$file_web_path = null;   // path used in href for browser
+$file_fs_path  = null;   // path used for is_file() on server
 $ext  = null;
 
 if (isset($_GET['id'])) {
@@ -41,14 +41,21 @@ if (isset($_GET['id'])) {
     $selected_text = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($selected_text && !empty($selected_text["filename"])) {
-        // Assuming the physical file is still stored in /uploads
-        $file = "uploads/" . $selected_text["filename"];
-        $ext  = strtolower(pathinfo($selected_text["filename"], PATHINFO_EXTENSION));
+        // Physical files stored in /uploads at project root
+        $filename = $selected_text["filename"];
+
+        // Web path (used in links)
+        $file_web_path = "../uploads/" . $filename;
+
+        // File system path (used for is_file)
+        $file_fs_path = __DIR__ . "/../uploads/" . $filename;
+
+        $ext  = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
     }
 }
 
 // ---------------------
-// Fetch ALL texts for the list (from Texts)
+// Fetch ALL texts for the list (from Texts) – currently unused but fine
 // ---------------------
 $stmt = $pdo->query("
     SELECT text_id, title, author, member_author, filename, popularity, date_published, uploaded_at
@@ -63,12 +70,18 @@ $texts = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <title>View Texts</title>
     <meta charset="UTF-8">
     <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
+        body { font-family: Arial, sans-serif; }
         table { border-collapse: collapse; width: 100%; margin-top: 20px; font-size: 0.9rem; }
         th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; }
         th { background-color: #f2f2f2; }
-        .layout { display: grid; grid-template-columns: 1.3fr 1.7fr; gap: 30px; align-items: flex-start; }
-        .text-viewer { border: 1px solid #ccc; padding: 10px; min-height: 400px; background:#fafafa; }
+        .layout { display: grid; grid-template-columns: 1.3fr 1.7fr; gap: 30px; align-items: flex-start; margin: 10vh auto; }
+        .text-container { min-width: 75dvw; min-height: 75dvh; display: flex; flex-direction: column; align-items: center; }
+        .row-container { display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; }
+        .text-viewer { width: 100%; height: 100%; }
+        .text-viewer:has(iframe), .text-container:has(iframe) { height: 100%; }
+        .row-container:has(iframe) .infocard { height: 5dvh; }
+        .row-container:has(iframe) .infocard:hover { height: auto !important; }
+        iframe { position: unset !important; width: 100% !important; height: 100% !important; }
         pre { white-space: pre-wrap; word-wrap: break-word; }
         .home-btn {
             display: inline-block;
@@ -93,91 +106,31 @@ $texts = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
         .download-btn:hover { background: #1e7e34; }
         .info-msg { color: #777; font-style: italic; margin-top: 10px; }
+        .infocard { margin-bottom: 10px; }
     </style>
 </head>
-<body>
-    <!-- Adjust Home.php / home.php depending on your actual file name -->
-    <a href="Home.php" class="home-btn">← Back to Home</a>
+<body style="flex-direction: column !important;">
+    <?php include("../components/navbar.php"); ?>
 
-    <h1>View Texts</h1>
-    <p>Click on a text in the list to view it. Each view increases its popularity.</p>
-
-    <div class="layout">
-        <!-- LEFT: List of texts -->
-        <div>
-            <h2>Available Texts</h2>
-            <table>
-                <tr>
-                    <th>ID</th>
-                    <th>Title</th>
-                    <th>Author</th>
-                    <th>Member Author</th>
-                    <th>Filename</th>
-                    <th>Popularity</th>
-                    <th>Date Published</th>
-                    <th>Uploaded At</th>
-                    <th>Action</th>
-                </tr>
-                <?php if (!empty($texts)): ?>
-                    <?php foreach ($texts as $row): ?>
-                        <tr>
-                            <td><?php echo (int)$row["text_id"]; ?></td>
-                            <td><?php echo htmlspecialchars($row["title"]); ?></td>
-                            <td><?php echo htmlspecialchars($row["author"]); ?></td>
-                            <td><?php echo htmlspecialchars($row["member_author"]); ?></td>
-                            <td>
-                                <?php if (!empty($row["filename"])): ?>
-                                    <a href="uploads/<?php echo htmlspecialchars($row["filename"]); ?>" target="_blank">
-                                        <?php echo htmlspecialchars($row["filename"]); ?>
-                                    </a>
-                                <?php else: ?>
-                                    <em>None</em>
-                                <?php endif; ?>
-                            </td>
-                            <td><?php echo (int)$row["popularity"]; ?></td>
-                            <td><?php echo htmlspecialchars($row["date_published"]); ?></td>
-                            <td><?php echo htmlspecialchars($row["uploaded_at"]); ?></td>
-                            <td>
-                                <a href="view_text.php?id=<?php echo (int)$row['text_id']; ?>">View</a>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <tr><td colspan="9">No texts in the database yet.</td></tr>
-                <?php endif; ?>
-            </table>
-        </div>
-
-        <!-- RIGHT: Viewer for selected text -->
-        <div>
+    <div class="text-container">
+        <div class="row-container">
             <h2>Text Viewer</h2>
-            <div class="text-viewer">
-                <?php if ($selected_text): ?>
+
+            <?php if ($selected_text): ?>
+                <div class="infocard">
                     <h3><?php echo htmlspecialchars($selected_text["title"]); ?></h3>
                     <p>
                         <strong>Author:</strong> <?php echo htmlspecialchars($selected_text["author"]); ?><br>
                         <strong>Member Author:</strong> <?php echo htmlspecialchars($selected_text["member_author"]); ?><br>
                         <strong>Popularity:</strong> <?php echo (int)$selected_text["popularity"]; ?><br>
-                        <strong>Date Published:</strong> <?php echo htmlspecialchars($selected_text["date_published"]); ?><br>
-                        <strong>Uploaded At:</strong> <?php echo htmlspecialchars($selected_text["uploaded_at"]); ?>
+                        <strong>Date Published:</strong> <?php echo htmlspecialchars($selected_text["date_published"]); ?>
                     </p>
+                </div>
 
-                    <?php
-                        if (!$file || !is_file($file)) {
-                            echo "<p class='info-msg'>File not found on server.</p>";
-                        } else {
-                            if ($ext === "txt") {
-                                $content = file_get_contents($file);
-                                echo "<pre>" . htmlspecialchars($content) . "</pre>";
-                            } elseif ($ext === "pdf") {
-                                echo "<iframe src='" . htmlspecialchars($file) . "#toolbar=1' width='100%' height='500px'></iframe>";
-                            } else {
-                                echo "<p class='info-msg'>Unsupported file type.</p>";
-                            }
-                        }
-                    ?>
+                <?php include("../components/viewer.php"); ?>
 
-                    <!-- DOWNLOAD SECTION -->
+                <!-- DOWNLOAD SECTION -->
+                <div class="download">
                     <hr style="margin:20px 0;">
                     <h3>Download</h3>
 
@@ -186,23 +139,25 @@ $texts = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <strong>You must be logged in as a member to download this text.</strong>
                         </p>
 
-                    <?php elseif (!$file || !is_file($file)): ?>
+                    <?php elseif (!$file_fs_path || !is_file($file_fs_path)): ?>
                         <p class="info-msg">
                             File not found on the server.
                         </p>
 
                     <?php else: ?>
-                        <a class="download-btn" href="<?php echo htmlspecialchars($file); ?>" download>
+                        <!-- This link will work for TXT, PDF, etc. -->
+                        <a class="download-btn"
+                           href="../download.php?file=<?php echo urlencode($file_web_path); ?>&id=<?php echo (int)$selected_text['text_id']; ?>">
                             ⬇️ Download Text (<?php echo strtoupper($ext); ?>)
                         </a>
                     <?php endif; ?>
+                </div>
 
-                <?php else: ?>
-                    <p class="info-msg">
-                        Select a text from the list on the left to view its content.
-                    </p>
-                <?php endif; ?>
-            </div>
+            <?php else: ?>
+                <p class="info-msg">
+                    Select a text from the list (or via link) to view and download it.
+                </p>
+            <?php endif; ?>
         </div>
     </div>
 

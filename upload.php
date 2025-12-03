@@ -1,16 +1,53 @@
 <?php
-// Show errors while we fix this
+// OPTIONAL: show errors while debugging (remove in production)
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 // --- Database connection ---
-$servername = "mvc353.encs.concordia.ca";
-$username   = "mvc353_2";
-$password   = "firstsound58";
-$dbname     = "mvc353_2";
+// db.php already starts the session, according to your notice
+include_once("../database/db.php");
 
-$conn = new mysqli($servername, $username, $password, $dbname);
+// Safety check: if for some reason the session is not active, start it
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+
+// --------------------------------------------------------------
+// Resolve current member (user_id + display name)
+// --------------------------------------------------------------
+
+// Try to get user_id directly from session
+$currentMemberId = $_SESSION['user_id'] ?? null;
+$currentMemberName = null;
+
+if ($currentMemberId !== null) {
+    // We have user_id in session; get name for display
+    $stmt = $conn->prepare("SELECT name_or_username FROM Members WHERE user_id = ?");
+    $stmt->bind_param("i", $currentMemberId);
+    $stmt->execute();
+    $stmt->bind_result($currentMemberName);
+    $stmt->fetch();
+    $stmt->close();
+} else {
+    // No user_id in session; try to get by username
+    $currentMemberName = $_SESSION['name_or_username'] 
+        ?? ($_SESSION['username'] ?? null);
+
+    if ($currentMemberName !== null) {
+        $stmt = $conn->prepare("SELECT user_id FROM Members WHERE name_or_username = ?");
+        $stmt->bind_param("s", $currentMemberName);
+        $stmt->execute();
+        $stmt->bind_result($currentMemberId);
+        $stmt->fetch();
+        $stmt->close();
+    }
+}
+
+// Final guard: must have both an ID and a name
+if (!$currentMemberId || !$currentMemberName) {
+    die("You must be logged in to access this page.");
+}
 
 // Message to show in HTML
 $upload_message = "";
@@ -21,28 +58,40 @@ $upload_message = "";
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["delete_id"])) {
     $delete_id = (int) $_POST["delete_id"];
 
-    // Get filename so we can delete the physical file
-    $stmt = $conn->prepare("SELECT filename FROM uploads WHERE textid = ?");
-    $stmt->bind_param("i", $delete_id);
+    // Get filename so we can delete the physical file, but only if it belongs to this member
+    $stmt = $conn->prepare("
+        SELECT filename 
+        FROM Texts 
+        WHERE text_id = ? AND member_author = ?
+    ");
+    $stmt->bind_param("ii", $delete_id, $currentMemberId);
     $stmt->execute();
     $stmt->bind_result($filename_to_delete);
-    $stmt->fetch();
+    $has_row = $stmt->fetch();
     $stmt->close();
 
-    if ($filename_to_delete) {
-        $file_path = __DIR__ . "/uploads/" . $filename_to_delete;
-        if (is_file($file_path)) {
-            unlink($file_path); // delete the file from disk
+    if ($has_row) {
+        if ($filename_to_delete) {
+            $file_path = "../uploads/" . $filename_to_delete;
+            if (is_file($file_path)) {
+                unlink($file_path); // delete the file from disk
+            }
         }
+
+        // Delete DB row (again restricted to this member)
+        $stmt = $conn->prepare("
+            DELETE FROM Texts 
+            WHERE text_id = ? AND member_author = ?
+        ");
+        $stmt->bind_param("ii", $delete_id, $currentMemberId);
+        $stmt->execute();
+        $stmt->close();
+
+        $upload_message = "Upload deleted successfully.";
+    } else {
+        // Either doesn't exist or doesn't belong to this user
+        $upload_message = "Cannot delete this upload (not found or not yours).";
     }
-
-    // Delete DB row
-    $stmt = $conn->prepare("DELETE FROM uploads WHERE textid = ?");
-    $stmt->bind_param("i", $delete_id);
-    $stmt->execute();
-    $stmt->close();
-
-    $upload_message = "Upload deleted successfully.";
 }
 
 // ====================================================================================
@@ -50,7 +99,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["delete_id"])) {
 // ====================================================================================
 elseif ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["textfile"])) {
 
-    $target_dir = __DIR__ . "/uploads/";  // real path on disk
+    $target_dir = "../uploads/";  // real path on disk
 
     if (!is_dir($target_dir)) {
         mkdir($target_dir, 0775, true);
@@ -60,10 +109,11 @@ elseif ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["textfile"])) {
     $tmp_name      = $_FILES["textfile"]["tmp_name"] ?? '';
     $error_code    = $_FILES["textfile"]["error"] ?? UPLOAD_ERR_NO_FILE;
 
-    $title          = trim($_POST["title"] ?? "");
-    $author         = trim($_POST["author"] ?? "");
-    $member_author  = trim($_POST["member_author"] ?? "");
-    $date_raw       = $_POST["date_published"] ?? "";
+    $title    = trim($_POST["title"] ?? "");
+    $author   = trim($_POST["author"] ?? "");
+    // In DB, member_author is the INT user_id of the logged-in member
+    $member_author_id = $currentMemberId;
+    $date_raw = $_POST["date_published"] ?? "";
 
     // ------------------------------
     // Basic server-side validation
@@ -77,11 +127,6 @@ elseif ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["textfile"])) {
 
     if ($title === "") {
         $upload_message = "Title is required.";
-        $is_valid = false;
-    }
-
-    if ($member_author === "") {
-        $upload_message = "Member Author is required.";
         $is_valid = false;
     }
 
@@ -114,13 +159,15 @@ elseif ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["textfile"])) {
         $target_file = $target_dir . $safe_name;
 
         if (move_uploaded_file($tmp_name, $target_file)) {
-            // Insert into uploads(title, author, member_author, filename, date_published)
+            // Insert into Texts(title, author, member_author, filename, date_published)
             $stmt = $conn->prepare("
-                INSERT INTO uploads (title, author, member_author, filename, date_published)
+                INSERT INTO Texts (title, author, member_author, filename, date_published)
                 VALUES (?, ?, ?, ?, ?)
             ");
-            $stmt->bind_param("sssss", $title, $author, $member_author, $safe_name, $date_published);
+            // member_author is INT, others are strings
+            $stmt->bind_param("ssiss", $title, $author, $member_author_id, $safe_name, $date_published);
             $stmt->execute();
+            $stmt->close();
 
             $upload_message = "File '" . htmlspecialchars($original_name) . "' uploaded successfully.";
         } else {
@@ -130,18 +177,23 @@ elseif ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["textfile"])) {
 }
 
 // ====================================================================================
-// 3) FETCH DATA TO DISPLAY
+// 3) FETCH DATA TO DISPLAY (ONLY THIS MEMBER'S TEXTS)
 // ====================================================================================
-$result = $conn->query("
-    SELECT textid, title, author, member_author, filename, popularity, date_published, uploaded_at
-    FROM uploads
+$stmt = $conn->prepare("
+    SELECT text_id, title, author, member_author, filename, popularity, date_published, uploaded_at
+    FROM Texts
+    WHERE member_author = ?
     ORDER BY uploaded_at DESC
 ");
+$stmt->bind_param("i", $currentMemberId);
+$stmt->execute();
+$result = $stmt->get_result();
 ?>
 <!DOCTYPE html>
 <html>
 <head>
     <title>Text / PDF Upload System</title>
+    <link rel="stylesheet" href="../style/main.css">
     <style>
         body { font-family: Arial, sans-serif; margin: 40px; }
         table { border-collapse: collapse; width: 100%; margin-top: 20px; }
@@ -169,77 +221,83 @@ $result = $conn->query("
     </style>
 </head>
 <body>
-    <h1>Upload a Text or PDF File</h1>
-    <p style="color: #666; font-style: italic;">Version: validated + deletable upload.php</p>
+<?php include_once("../components/navbar.php"); ?>
 
-    <a href="home.php" class="back-btn">← Back to Home</a>
+<div class="section-container" style="padding: var(--navHeight); display: flex; flex-direction: column;">
+    <div class="left">
+        <h1>Upload a Text or PDF File</h1>
 
-    <?php if ($upload_message !== ""): ?>
-        <div class="msg <?php echo (strpos($upload_message, 'successfully') !== false || strpos($upload_message, 'deleted') !== false) ? 'ok' : 'err'; ?>">
-            <?php echo htmlspecialchars($upload_message); ?>
-        </div>
-    <?php endif; ?>
-
-    <form action="upload.php" method="post" enctype="multipart/form-data">
-        <label>Title:</label><br>
-        <input type="text" name="title" required><br>
-
-        <label>Author:</label><br>
-        <input type="text" name="author"><br>
-
-        <label>Member Author (your name):</label><br>
-        <input type="text" name="member_author" required><br>
-
-        <label>Date Published:</label><br>
-        <input type="date" name="date_published"><br>
-
-        <label>Select file (.txt or .pdf):</label><br>
-        <input type="file" name="textfile" accept=".txt,.pdf" required><br><br>
-
-        <input type="submit" value="Upload">
-    </form>
-
-    <h2>Uploaded Files</h2>
-    <table>
-        <tr>
-            <th>ID</th>
-            <th>Title</th>
-            <th>Author</th>
-            <th>Member Author</th>
-            <th>Filename</th>
-            <th>Popularity</th>
-            <th>Date Published</th>
-            <th>Uploaded At</th>
-            <th>Actions</th>
-        </tr>
-        <?php if ($result && $result->num_rows > 0): ?>
-            <?php while ($row = $result->fetch_assoc()) { ?>
-                <tr>
-                    <td><?php echo $row["textid"]; ?></td>
-                    <td><?php echo htmlspecialchars($row["title"]); ?></td>
-                    <td><?php echo htmlspecialchars($row["author"]); ?></td>
-                    <td><?php echo htmlspecialchars($row["member_author"]); ?></td>
-                    <td>
-                        <a href="uploads/<?php echo htmlspecialchars($row["filename"]); ?>" target="_blank">
-                            <?php echo htmlspecialchars($row["filename"]); ?>
-                        </a>
-                    </td>
-                    <td><?php echo $row["popularity"]; ?></td>
-                    <td><?php echo $row["date_published"]; ?></td>
-                    <td><?php echo $row["uploaded_at"]; ?></td>
-                    <td>
-                        <form method="post" class="inline" onsubmit="return confirm('Delete this upload?');">
-                            <input type="hidden" name="delete_id" value="<?php echo (int)$row['textid']; ?>">
-                            <button type="submit">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-            <?php } ?>
-        <?php else: ?>
-            <tr><td colspan="9">No uploads yet.</td></tr>
+        <?php if ($upload_message !== ""): ?>
+            <div class="msg <?php echo (strpos($upload_message, 'successfully') !== false || strpos($upload_message, 'deleted') !== false) ? 'ok' : 'err'; ?>">
+                <?php echo htmlspecialchars($upload_message); ?>
+            </div>
         <?php endif; ?>
-    </table>
 
+        <form action="TextUpload.php" method="post" enctype="multipart/form-data" style="margin: auto;width: fit-content;">
+            <label>Title:</label><br>
+            <input type="text" name="title" required><br>
+
+            <label>Author:</label><br>
+            <input type="text" name="author"><br>
+
+            <!-- Show the logged-in member name (no need to type it) -->
+            <label>Member Author (your name):</label><br>
+            <input type="text" value="<?php echo htmlspecialchars($currentMemberName); ?>" disabled><br>
+
+            <label>Date Published:</label><br>
+            <input type="date" name="date_published"><br>
+
+            <label>Select file (.txt or .pdf):</label><br>
+            <input type="file" name="textfile" accept=".txt,.pdf" required><br><br>
+
+            <input type="submit" value="Upload">
+        </form>
+    </div>
+
+    <div class="right">
+        <h2>Uploaded Files</h2>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Member Author</th>
+                <th>Filename</th>
+                <th>Popularity</th>
+                <th>Date Published</th>
+                <th>Uploaded At</th>
+                <th>Actions</th>
+            </tr>
+            <?php if ($result && $result->num_rows > 0): ?>
+                <?php while ($row = $result->fetch_assoc()) { ?>
+                    <tr>
+                        <td><?php echo $row["text_id"]; ?></td>
+                        <td><?php echo htmlspecialchars($row["title"]); ?></td>
+                        <td><?php echo htmlspecialchars($row["author"]); ?></td>
+                        <!-- All rows belong to this member, so show their name -->
+                        <td><?php echo htmlspecialchars($currentMemberName); ?></td>
+                        <td>
+                            <a href="../uploads/<?php echo htmlspecialchars($row["filename"]); ?>" target="_blank">
+                                <?php echo htmlspecialchars($row["filename"]); ?>
+                            </a>
+                        </td>
+                        <td><?php echo $row["popularity"]; ?></td>
+                        <td><?php echo $row["date_published"]; ?></td>
+                        <td><?php echo $row["uploaded_at"]; ?></td>
+                        <td>
+                            <form method="post" class="inline" onsubmit="return confirm('Delete this upload?');">
+                                <input type="hidden" name="delete_id" value="<?php echo (int)$row['text_id']; ?>">
+                                <button type="submit">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                <?php } ?>
+            <?php else: ?>
+                <tr><td colspan="9">No uploads yet.</td></tr>
+            <?php endif; ?>
+        </table>
+    </div>
+</div>
 </body>
 </html>
 <?php
