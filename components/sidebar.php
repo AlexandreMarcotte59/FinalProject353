@@ -3,7 +3,6 @@
         <input type="hidden" name="userID" value="<?=  $user_id ?>">
         <h3><a href="/">CopyForward</a></h3>
         <?php if ($_SESSION["user_id"]): ?>
-        <a href="/pages/MyEmail.php">My Email</a>
         <a href="/pages/MyContents.php">My Contents</a>
         <a href="/pages/MyCommittees.php">My Committees</a>
         <span class="separator"><hr/>*<hr/></span>
@@ -12,6 +11,7 @@
         <span class="separator"><hr/>*<hr/></span>
         <a href="/pages/TextUpload.php">Upload Text</a>
         <a href="/pages/CreateCommittee.php">Create a Committee</a>
+        <a href="/pages/Dashboard.php">Dashboard</a>
         <?php endif ?>
         <a href="/pages/FAQ.php">FAQs</a>
         

@@ -96,13 +96,13 @@ if (isset($_POST['search'])){
                 dialog.querySelector(".closeDialog").addEventListener("click", () => dialog.close());            
             });
         });
-        function ModalHandler(){
+        function modalHandler(){
         		const dialog = document.querySelector(`#dialogMessage`);   
 		dialog.showModal();
 		dialog.querySelector(".closeDialog").addEventListener("click", () => dialog.close()); 
       	       return false;
 	}
-	function SubmitCard(card) {
+	function submitCard(card) {
 	    const form = card.querySelector('form');
 	    if (form) {
 		    form.submit();
@@ -115,7 +115,7 @@ if (isset($_POST['search'])){
 <body>
         <div class="navbar">
         	<div class="left-side">
-            	<a id="hamburger" onclick="ModalHandler()">≡</a>
+            	<a id="hamburger" onclick="modalHandler()">≡</a>
             </div>
         	<div class="right-side">
                 <?php if ($is_member): ?>                

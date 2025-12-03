@@ -6,8 +6,13 @@
         --clr-good: limegreen;
         --navHeight: 5vh;
     }
-    * { box-sizing: border-box;    }
-    html, body {
+
+    * {
+        box-sizing: border-box;
+    }
+
+    html,
+    body {
         height: 100%;
         margin: 0;
     }
@@ -46,56 +51,78 @@
         margin: 0 auto 20px auto;
         max-width: 80%;
     }
-    .main-container {height: 100dvh;}
-    .data-container, .home-container, .card-container {
+
+    .main-container {
+        height: 100dvh;
+    }
+
+    .data-container,
+    .home-container,
+    .card-container,
+    .library-container,
+    .dashboard,
+    .stat-container {
         width: 80vw;
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
         gap: 1vw;
     }
-    .card-container { justify-content: center; padding: 5px !important; }
+
+    .card-container {
+        justify-content: center;
+        padding: 5px !important;
+    }
 
     .card form {
         margin: 0 !important;
         padding: 0 !important;
     }
+
     .card:hover {
         transform: scale(1.05);
         filter: saturate(50%);
     }
+
     .card {
-            background-color: sandybrown;
-            width: fit-content;
-            max-width: 30%;
-            min-width: 25%;
-            border-radius: 20px;
-            padding: 10px 20px;
-            min-height: fit-content;
+        background-color: sandybrown;
+        width: fit-content;
+        max-width: 30%;
+        min-width: 25%;
+        border-radius: 20px;
+        padding: 10px 20px;
+        min-height: fit-content;
     }
-    .home-container{
-            overflow: hidden auto;
-            max-height: 60%;
-            padding: 0 1dvw;
-            align-items: flex-start;
-            align-content: flex-start;
-            scrollbar-width: none;
-            flex-wrap: nowrap;
-            flex-direction: column !important;
+
+    .home-container {
+        overflow: hidden auto;
+        max-height: 60%;
+        padding: 0 1dvw;
+        align-items: flex-start;
+        align-content: flex-start;
+        scrollbar-width: none;
+        flex-wrap: nowrap;
+        flex-direction: column !important;
     }
-    .home-container h4{ margin:0;}
+
+    .home-container h4 {
+        margin: 0;
+    }
+
     .home-container .card {
-            background-color: sandybrown;
-            width: fit-content;
-            max-width: 30%;
-            border-radius: 20px;
-            padding: 10px 20px;
-            max-height: fit-content;
+        background-color: sandybrown;
+        width: fit-content;
+        max-width: 30%;
+        border-radius: 20px;
+        padding: 10px 20px;
+        max-height: fit-content;
     }
+
     .home-container .card:hover {
-            transform: scale(1.05);
-            filter: saturate(50%);
+        transform: scale(1.05);
+        filter: saturate(50%);
     }
+
     .inbox-container {
         margin: 10vh auto;
         padding: 10vw;
@@ -105,28 +132,50 @@
         background-color: white;
     }
 
-    .charity-container, .faq-container { height: 100%; width: 80%; }
+    .charity-container,
+    .faq-container {
+        height: 100%;
+        width: 80%;
+    }
+
     .charity-container {
-            display: flex;
-            flex-direction: row;
-            flex-wrap: wrap;
-            gap: 2vw;
-            padding: 10vh 0;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 2vw;
+        padding: 10vh 0;
     }
+
     .charity-container .card {
-            background-color: sandybrown;
-            border-radius: 8px;
-            width: 30dvw;
-            height: fit-content;
-            padding: 1dvh;
+        background-color: sandybrown;
+        border-radius: 8px;
+        width: 30dvw;
+        height: fit-content;
+        padding: 1dvh;
     }
-    .card-footer { justify-content: center; display: flex; flex-direction: row;}
+
+    .profile-container {
+        background-color: var(--clr-pop);
+        border-radius: 10px;
+        padding: 5vw;
+    }
+
+    .card-footer {
+        justify-content: center;
+        display: flex;
+        flex-direction: row;
+    }
+
     .card button[type="submit"] {
-            background-color: white;
-            border-radius: 8px;
-            border: none;
-            padding: 8px;
-    }.card button[type="submit"]:hover { box-shadow: 2px 2px 2px black;}
+        background-color: white;
+        border-radius: 8px;
+        border: none;
+        padding: 8px;
+    }
+
+    .card button[type="submit"]:hover {
+        box-shadow: 2px 2px 2px black;
+    }
 
     .navbar {
         position: fixed;
@@ -250,9 +299,24 @@
         margin: 20px auto;
         gap: 1vh;
     }
-    .viewer:has(pre) {overflow-y: scroll; width: 100%; }
-    .viewer pre { overflow: hidden !important; height: fit-content;}
-    .chatbox input{ background-color: wheat; width: 100%; border-radius: 8px; border: none;}
+
+    .viewer:has(pre) {
+        overflow-y: scroll;
+        width: 100%;
+    }
+
+    .viewer pre {
+        overflow: hidden !important;
+        height: fit-content;
+    }
+
+    .chatbox input {
+        background-color: wheat;
+        width: 100%;
+        border-radius: 8px;
+        border: none;
+    }
+
     .chat-viewer {
         height: 100%;
         display: flex;
@@ -260,6 +324,7 @@
         gap: 10px;
         justify-content: space-between;
     }
+
     .chat-history {
         height: 80dvh;
         background-color: wheat;
