@@ -52,19 +52,16 @@ CREATE TABLE TextComments (
 );
 
 CREATE TABLE Donations (
-    donation_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    text_id INT NOT NULL,
-    charity_id INT NOT NULL,
-    amount DECIMAL(10,2) NOT NULL,
-    charity_percent INT NOT NULL,
-    author_percent INT NOT NULL,
-    cfp_percent INT NOT NULL,
-    donation_date DATE DEFAULT CURRENT_DATE,
-    FOREIGN KEY (user_id) REFERENCES Members(user_id),
-    FOREIGN KEY (text_id) REFERENCES Texts(text_id),
-    FOREIGN KEY (charity_id) REFERENCES Charities(charity_id)
-);
+  donation_id int AUTO_INCREMENT PRIMARY KEY,
+  text_id int DEFAULT NULL,
+  user_id int DEFAULT NULL,
+  quantity decimal(10,2) DEFAULT NULL,
+  destination int DEFAULT NULL,
+  date datetime DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`user_id`) REFERENCES `Members` (`user_id`),
+  FOREIGN KEY (`destination`) REFERENCES `Charities` (`char_id`),
+  FOREIGN KEY (`text_id`) REFERENCES `Texts` (`text_id`)
+)
 
 
 CREATE TABLE Questions (
@@ -85,11 +82,12 @@ CREATE TABLE Answers (
 );
 
 
-CREATE TABLE Committee (
-    committee_id INT AUTO_INCREMENT PRIMARY KEY,
-    subject VARCHAR(255)
-);
-
+CREATE TABLE Committees (
+  committee_id int AUTO_INCREMENT PRIMARY KEY,
+  subject varchar(255) COLLATE utf8mb3_unicode_ci DEFAULT NULL,
+  purpose text COLLATE utf8mb3_unicode_ci NOT NULL,
+  created_by int NOT NULL
+)
 
 CREATE TABLE CommitteeVolunteers (
     committee_id INT,
@@ -139,11 +137,11 @@ CREATE TABLE Statistics (
 );
 
 CREATE TABLE Charities (
-    charity_id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    description TEXT,
-    status ENUM('approved', 'pending') DEFAULT 'approved'
-);
+  char_id int AUTO_INCREMENT PRIMARY KEY,
+  name varchar(255) COLLATE utf8mb3_unicode_ci DEFAULT NULL,
+  about varchar(255) COLLATE utf8mb3_unicode_ci DEFAULT NULL,
+  organization varchar(100) COLLATE utf8mb3_unicode_ci DEFAULT NULL 
+)
 
 CREATE TABLE SuggestedCharities (
     suggestion_id INT AUTO_INCREMENT PRIMARY KEY,

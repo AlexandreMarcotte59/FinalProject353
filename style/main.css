@@ -3,6 +3,7 @@
         --bkg-container-clr: #f7e8c8ff;
         --border-clr: #fdbf8cff;
         --clr-pop: #fdbf8cff;
+        --clr-dark: #5a4d4d;
         --clr-good: limegreen;
         --navHeight: 5vh;
     }
@@ -153,13 +154,38 @@
         height: fit-content;
         padding: 1dvh;
     }
-
-    .profile-container {
-        background-color: var(--clr-pop);
+    .dashboard-top {display: flex; flex-direction: row; gap:2vw; }
+    .dashboard-top .profile-container {
+        background-color: var(--clr-dark);
         border-radius: 10px;
         padding: 5vw;
+        display:flex;
+        flex-direction:column;
+        min-height:50dvh;
+        justify-content:space-between;
+    } .profile-container a {
+        text-decoration: none;
+        background-color: white;
+        border-radius: 8px;
+        padding: .1dvh .2dvw;
+        display: block;
+        width: 100%;
+        text-align: center;
+        margin: 5px 0;
+    } .profile-container form{ display: flex; justify-content: space-between; }
+    .profile-container button {
+        text-decoration: none;
+        background-color: white;
+        border-radius: 8px;
+        padding: .1dvh .2dvw;
+        border: none;
     }
-
+    .dashboard-top .work-stats {
+            background-color: var(--clr-dark);
+            border-radius: 10px;
+            padding: 5vw;
+            color: white;
+    }
     .card-footer {
         justify-content: center;
         display: flex;
@@ -268,7 +294,10 @@
         border-radius: 5px;
         color: white;
     }
-
+    .sidebar .btn-4 {background-color: var(--clr-dark);}
+    .sidebar .btn-3 {background-color: salmon}
+    .sidebar .btn-2 {background-color: sandybrown;}
+    .sidebar .btn-2 {background-color: var(--clr-pop);}
     .sidebar h3 a {
         font-family: 'lucida handwriting';
         display: block;
@@ -288,7 +317,7 @@
         white-space: nowrap;
     }
 
-    .sidebar .separator hr {
+    .sidebar .separator hr, .separator hr {
         display: inline-flex;
         width: 45%;
     }
