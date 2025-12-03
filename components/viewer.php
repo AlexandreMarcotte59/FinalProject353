@@ -16,7 +16,9 @@
                         $content = file_get_contents($file);
                         echo "<pre>" . htmlspecialchars($content) . "</pre>";
                     } elseif ($ext === "pdf") {
-                        echo "<iframe src='" . htmlspecialchars($filepath) . "#toolbar=1' width='100%' height='500px'></iframe>";
+                        echo "<iframe 
+                        style='position:fixed;border-radius:8px;top:8vh;right:10vw;'
+                        src='" . htmlspecialchars($filepath) . "#toolbar=0' width='60%' height='90%'></iframe>";
                     } else {
                         echo "<p class='info-msg'>Unsupported file type.</p>";
                     }

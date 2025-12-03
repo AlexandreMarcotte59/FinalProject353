@@ -74,10 +74,11 @@ $texts = $stmt->fetchAll(PDO::FETCH_ASSOC);
         th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; }
         th { background-color: #f2f2f2; }
         .layout { display: grid; grid-template-columns: 1.3fr 1.7fr; gap: 30px; align-items: flex-start; margin: 10vh auto; }
-        .text-container { min-width: 75dvw; min-height: 75dvh; display: flex; flex-direction: column; align-items: center; }
-        .row-container { display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; }
-        .text-viewer { width: 100%; height: 100%; }
-        .text-viewer:has(iframe), .text-container:has(iframe) { height: 100%; }
+        /*.text-viewer { border: 1px solid #ccc; padding: 10px; min-height: 400px; background:#fafafa; }*/
+        .text-container { width: 100%; min-height: 75dvh; display: flex; flex-direction: column; align-items: center; }
+        .row-container { display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%;}
+        .text-viewer {width: 70%; height:70%;}
+        .text-viewer:has(iframe), .text-container:has(iframe) {height:95%;}
         .row-container:has(iframe) .infocard { height: 5dvh; }
         .row-container:has(iframe) .infocard:hover { height: auto !important; }
         iframe { position: unset !important; width: 100% !important; height: 100% !important;}
@@ -140,7 +141,7 @@ $texts = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <!-- DOWNLOAD SECTION -->
                 <div class="download">
                     <hr style="margin:5px 0;">
-                    <h3>Download</h3>
+                    <h3 style="margin:0;text-align:center;">Download</h3>
 
                     <?php if (!$is_member): ?>
                         <p class="info-msg">
