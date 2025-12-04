@@ -23,7 +23,6 @@ try {
      die("ERROR: Could not connect to the database. " . $e->getMessage());
 }
 
-// Start session to handle user messages - MADE by Chatgpt so I commented it out for the tutorial's solution
 session_start();
 $error = '';
 
