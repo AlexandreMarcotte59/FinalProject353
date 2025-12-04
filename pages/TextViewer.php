@@ -42,9 +42,10 @@ if (isset($_POST['id'])) {
     if ($selected_text && !empty($selected_text["filename"])) {
         // Physical files stored in /uploads at project root
         $filename = $selected_text["filename"];
-
+        $filepath = "/uploads/" . $selected_text["filename"];
+        $file = $ROOTPATH . $filepath;
         // Web path (used in links)
-        $file_web_path = "../uploads/" . $filename;
+        $file_web_path = $file;
 
         // File system path (used for is_file)
         $file_fs_path = __DIR__ . "/../uploads/" . $filename;
