@@ -8,9 +8,9 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 
 
-$sql = "SELECT m.*, u.username AS recipient_name
-        FROM messages m
-        JOIN users u ON m.recipient_id = u.user_id
+$sql = "SELECT m.*, u.name_or_username AS recipient_name
+        FROM InboxMessages m
+        JOIN Members u ON m.recipient_id = u.user_id
         WHERE m.sender_id = ?
         ORDER BY m.sent_datetime DESC";
 
@@ -19,11 +19,6 @@ $stmt->execute([$user_id]);
 $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-
-<?php 
-include "../components/navbar.php";
-include "includes/header.php";
-?>
 <h2>Sent Messages</h2>
 
 <table>
@@ -43,4 +38,3 @@ include "includes/header.php";
 
 </table>
 
-<?php include "footer.php"; ?>

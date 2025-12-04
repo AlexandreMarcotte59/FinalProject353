@@ -101,9 +101,12 @@ if (isset($_POST['search'])) {
         });*/
         function modalHandler(elemid) {
             let dialog = document.querySelector(`#${elemid}`);
+            if (!dialog) {
+                console.warn("Modal not found:", elemid);
+                return false;
+            }
             dialog.querySelector(".closeDialog").addEventListener("click", () => dialog.close());
             dialog.showModal();
-            if (!dialog) return false;
         }
         function submitCard(card) {
             const form = card.querySelector('form');

@@ -2,7 +2,7 @@
 include "../database/db.php";
 ?>
 
-<h2>Send Message</h2>
+<h2>Compose Message</h2>
 
 <form method="POST" action="send_message.php">
 

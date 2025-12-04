@@ -17,11 +17,11 @@ $id = (int)$_GET['id'];
 
 
 $sql = "SELECT m.*, 
-        s.username AS sender_name, 
+        s.name_or_username AS sender_name, 
         r.username AS recipient_name
-        FROM messages m
-        JOIN users s ON m.sender_id = s.user_id
-        JOIN users r ON m.recipient_id = r.user_id
+        FROM InboxMessages m
+        JOIN Members s ON m.sender_id = s.user_id
+        JOIN Members r ON m.recipient_id = r.user_id
         WHERE m.message_id = ?
         AND (m.sender_id = ? OR m.recipient_id = ?)";
 
@@ -35,7 +35,7 @@ if (!$message) {
 
 
 if ($message['recipient_id'] == $current_user) {
-    $update = $pdo->prepare("UPDATE messages SET is_read = 1 WHERE message_id = ?");
+    $update = $pdo->prepare("UPDATE InboxMessages SET is_read = 1 WHERE message_id = ?");
     $update->execute([$id]);
 }
 ?>

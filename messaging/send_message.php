@@ -19,7 +19,7 @@ if (strlen($body) > 2048) {
     die("Message exceeds 2048 character limit.");
 }
 
-$sql = "INSERT INTO messages (sender_id, recipient_id, subject, body)
+$sql = "INSERT INTO InboxMessages (sender_id, recipient_id, subject, body)
         VALUES (?, ?, ?, ?)";
 
 $stmt = $pdo->prepare($sql);
