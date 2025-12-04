@@ -149,7 +149,7 @@ $texts = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <strong>You must be logged in as a member to download this text.</strong>
                         </p>
 
-                    <?php elseif (!$file_fs_path || !is_file($file_fs_path)): ?>
+                    <?php elseif (!$file || !is_file($file)): ?>
                         <p class="info-msg">
                             File not found on the server.
                         </p>
@@ -160,7 +160,7 @@ $texts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                         <?php if ($_SESSION['download_count'] < $_SESSION['downloads_allowed']): ?>
                         <a class="download-btn"
-                           href="../download.php?file=<?php echo urlencode($file_web_path); ?>&id=<?php echo (int)$selected_text['text_id']; ?>">
+                           href="../components/download.php?file=<?php echo urlencode($file); ?>&id=<?php echo (int)$selected_text['text_id']; ?>">
                             ⬇️ Download Text (<?php echo strtoupper($ext); ?>)
                         </a>
                         <?php endif; ?>
