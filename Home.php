@@ -41,8 +41,8 @@ if (!isset($_SESSION['user_id'])) {
     $base_window = 31;
     $bonusday = floor($total / 100); // 3100 in 20 years = 31
     $bonusnum = floor($recent_dono / 10); // 30 in last month = 3
-    $effective_window = max($base_window - $bonusday, 1);
-    if ($effective_window == 1) {
+    $effective_window = max(7 - $bonusday, 7);
+    if ($effective_window < 7) {
         $downloads_allowed = 1 + max($bonusday - $base_window, 0) + max($bonusnum, 0);
     } else {
         $downloads_allowed = 1;
@@ -50,7 +50,7 @@ if (!isset($_SESSION['user_id'])) {
 
     // Count recent downloads
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM Downloads WHERE user_id=? AND download_date >= NOW() - INTERVAL ? DAY");
-    $stmt->execute([$user_id, $effective_window]);
+    $stmt->execute([$user_id, $base_window]);
     $recent = $stmt->fetchColumn();
 
     if ($recent < $downloads_allowed) {
