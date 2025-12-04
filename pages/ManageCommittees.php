@@ -397,12 +397,6 @@ foreach ($committees as $c) {
             background: #28a745;
             color: #fff;
         }
-        .navbar {
-            display: flex;
-            justify-content: flex-start;
-            padding: 10px 20px;
-            background: #eee;
-        }
         .form-group { margin-bottom: 15px; }
         input[type="text"], textarea {
             width: 100%;
