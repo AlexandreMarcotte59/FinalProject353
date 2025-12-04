@@ -11,7 +11,7 @@ $user_id = (int) $_SESSION['user_id'];
 // 1) Committees you CREATED
 $stmt_created = $pdo->prepare("
     SELECT committee_id, subject, purpose
-    FROM Committee
+    FROM Committees
     WHERE created_by = :u
     ORDER BY committee_id DESC
 ");
@@ -22,7 +22,7 @@ $createdCommittees = $stmt_created->fetchAll(PDO::FETCH_ASSOC);
 $stmt_member = $pdo->prepare("
     SELECT c.committee_id, c.subject, c.purpose, c.created_by
     FROM CommitteeVolunteers cv
-    JOIN Committee c ON cv.committee_id = c.committee_id
+    JOIN Committees c ON cv.committee_id = c.committee_id
     WHERE cv.volunteer_id = :u
     ORDER BY c.committee_id DESC
 ");
@@ -46,7 +46,7 @@ $stmt_pending = $pdo->prepare("
            c.subject,
            c.purpose
     FROM CommitteeJoinRequests r
-    JOIN Committee c ON r.committee_id = c.committee_id
+    JOIN Committees c ON r.committee_id = c.committee_id
     WHERE r.user_id = :u AND r.status = 'pending'
     ORDER BY r.request_date ASC
 ");
