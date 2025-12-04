@@ -1,7 +1,5 @@
 <?php
-session_start();
-include "header.php";
-include "./components/db.php"; 
+include_once('../database/db.php');
 
 
 if (!isset($_SESSION['user_id'])) {
@@ -11,9 +9,9 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 
 
-$sql = "SELECT m.*, u.username AS sender_name
-        FROM messages m
-        JOIN users u ON m.sender_id = u.user_id
+$sql = "SELECT m.*, u.name_or_username AS sender_name
+        FROM InboxMessages m
+        JOIN Members u ON m.sender_id = u.user_id
         WHERE m.recipient_id = ?
         ORDER BY m.sent_datetime DESC";
 
@@ -22,25 +20,41 @@ $stmt->execute([$user_id]);
 $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<h2>Inbox</h2>
 
-<table>
-<tr>
-    <th>From</th>
-    <th>Subject</th>
-    <th>Date</th>
-    <th>Status</th>
-</tr>
+<?php 
+include "../components/navbar.php";
+include "includes/header.php";
+?>
+<div class="inbox-container">
+    <nav>
+        <a href="inbox.php">Inbox</a> |
+        <a href="sent_messages.php">Sent</a> |
+        <a href="compose_message.php" target="_blank">Compose</a>
+    </nav>
 
-<?php foreach ($messages as $row): ?>
-<tr onclick="window.open('read_message.php?id=<?= $row['message_id'] ?>','popup','width=600,height=400');">
-    <td><?= htmlspecialchars($row['sender_name']) ?></td>
-    <td><?= htmlspecialchars($row['subject']) ?></td>
-    <td><?= htmlspecialchars($row['sent_datetime']) ?></td>
-    <td><?= $row['is_read'] ? 'Read' : 'Unread' ?></td>
-</tr>
-<?php endforeach; ?>
+    <hr>
 
-</table>
+    <div class="container">
+        <h2>Inbox</h2>
 
-<?php include "footer.php"; ?>
+        <table>
+            <tr>
+                <th>From</th>
+                <th>Subject</th>
+                <th>Date</th>
+                <th>Status</th>
+            </tr>
+
+            <?php foreach ($messages as $row): ?>
+                <tr onclick="window.open('read_message.php?id=<?= $row['message_id'] ?>','popup','width=600,height=400');">
+                    <td><?= htmlspecialchars($row['sender_name']) ?></td>
+                    <td><?= htmlspecialchars($row['subject']) ?></td>
+                    <td><?= htmlspecialchars($row['sent_datetime']) ?></td>
+                    <td><?= $row['is_read'] ? 'Read' : 'Unread' ?></td>
+                </tr>
+            <?php endforeach; ?>
+
+        </table>
+    </div>
+    <?php include "footer.php"; ?>
+</div>
