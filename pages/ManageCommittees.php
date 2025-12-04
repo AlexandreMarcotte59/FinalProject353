@@ -341,6 +341,11 @@ foreach ($committees as $c) {
             padding: 20px;
             background: #f8f9fa;
             border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: scroll;
+            scrollbar-width: none;
         }
         h1 { margin-top: 0; }
         .btn {
@@ -379,14 +384,20 @@ foreach ($committees as $c) {
             border: 1px solid #bee5eb;
         }
         table {
-            width: 100%;
             border-collapse: collapse;
             background: white;
+            overflow-y: scroll;
+            scrollbar-width: none;
+            height: 100%;
+            display: block;
         }
         th, td {
             padding: 8px;
             border: 1px solid #dee2e6;
             text-align: left;
+            min-height: 1vh;
+            height: fit-content;
+            max-height: 2vh;
         }
         th { background: #e9ecef; }
         .badge {
