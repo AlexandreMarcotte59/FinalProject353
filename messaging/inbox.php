@@ -20,41 +20,43 @@ $stmt->execute([$user_id]);
 $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
+<?php include "../components/navbar.php"; ?>
 
-<?php
-include "../components/navbar.php";
-include "includes/header.php";
-?>
-<div class="inbox-container">
-    <nav>
-        <!--<a href="inbox.php">Inbox</a> |-->
-        <a onclick="modalHandler('compose_message')" target="_blank">Compose</a> |
-        <a onclick="modalHandler('sent_messages')"  target="_blank">Sent</a>
-    </nav>
+<div class="inbox">
+    <?php include "includes/header.php"; ?>
+    <h2 style="text-align: center;">Inbox</h2>
+    <div class="inbox-container">
+        <nav>
+            <!--<a href="inbox.php">Inbox</a> |-->
+            <a onclick="modalHandler('compose_message')" target="_blank">Compose</a>
+            <a onclick="modalHandler('sent_messages')" target="_blank">Sent</a>
+        </nav>
 
-    <hr>
+        <hr>
 
-    <div class="container">
-        <h2>Inbox</h2>
+        <div class="container">
+            <table>
+                <thead>
+                    <th>From</th>
+                    <th>Subject</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                </thead>
 
-        <table>
-            <tr>
-                <th>From</th>
-                <th>Subject</th>
-                <th>Date</th>
-                <th>Status</th>
-            </tr>
-
-            <?php foreach ($messages as $row): ?>
-                <tr onclick="window.open('read_message.php?id=<?= $row['message_id'] ?>','popup','width=600,height=400');">
-                    <td><?= htmlspecialchars($row['sender_name']) ?></td>
-                    <td><?= htmlspecialchars($row['subject']) ?></td>
-                    <td><?= htmlspecialchars($row['sent_datetime']) ?></td>
-                    <td><?= $row['is_read'] ? 'Read' : 'Unread' ?></td>
-                </tr>
-            <?php endforeach; ?>
-
-        </table>
+                <tbody>
+                    <?php foreach ($messages as $row): ?>
+                        <tr
+                            onclick="window.open('read_message.php?id=<?= $row['message_id'] ?>','popup','width=600,height=400');">
+                            <td><?= htmlspecialchars($row['sender_name']) ?></td>
+                            <td><?= htmlspecialchars($row['subject']) ?></td>
+                            <td><?= htmlspecialchars($row['sent_datetime']) ?></td>
+                            <td><?= $row['is_read'] ? 'Read' : 'Unread' ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+            <?php include "footer.php"; ?>
+        </div>
     </div>
     <dialog id="compose_message">
         <button class="closeDialog">X</button>
@@ -65,4 +67,3 @@ include "includes/header.php";
         <?php include("sent_messages.php"); ?>
     </dialog>
 </div>
-<?php include "footer.php"; ?>
