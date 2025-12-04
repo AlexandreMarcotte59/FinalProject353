@@ -20,6 +20,7 @@ CREATE TABLE Texts (
     popularity INT DEFAULT 0,
     date_published DATE,
     member_author INT,
+    is_blacklisted BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (member_author) REFERENCES Members(user_id)
 );
 
@@ -111,9 +112,11 @@ CREATE TABLE MemberAuthor (
 
 CREATE TABLE Vote (
     vote_id INT AUTO_INCREMENT PRIMARY KEY,
-    plagiarized_item INT,
-    result VARCHAR(50),
-    FOREIGN KEY (plagiarized_item) REFERENCES Texts(text_id)
+    plagiarized_item INT NOT NULL,
+    result VARCHAR(50) NOT NULL,
+    voter_id INT NOT NULL,
+    FOREIGN KEY (plagiarized_item) REFERENCES Texts(text_id),
+    FOREIGN KEY (voter_id) REFERENCES Members(user_id)
 );
 
 
