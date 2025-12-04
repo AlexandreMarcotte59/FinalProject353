@@ -1,39 +1,11 @@
 <?php
-//This page allows members to edit their information
-//Checks the member's session to ensure they are logged in(checks $_SESSION['user_id'] or $_SESSION['member_name'])
-//Then allows them to update their information by filling out some fields and pressing update
-//Also displays their current information such as 
-// name, email, organization, address, referral code, admin status, and verification matrix
-
-//Used to build the DSN for the PDO connection
-define('DB_HOST', 'mvc353.encs.concordia.ca');
-define('DB_USER', 'mvc353_2');
-define('DB_PASS', 'firstsound58');
-define('DB_NAME', 'mvc353_2');
-
-//Starts PHP session to access session variables (necessary for login check)
-session_start();
+include_once('../database/db.php');
 
 // Require login: accept either numeric user_id or member_name set by login code
 //Redirect to login page if not logged in
 if (empty($_SESSION['user_id']) && empty($_SESSION['member_name'])) {
     header('Location: MemberLogin.php');
     exit;
-}
-
-// Set up the database connection using PDO
-$dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4';
-$options = [
-    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::ATTR_EMULATE_PREPARES => false,
-];
-
-// Try to connect to the database
-try {
-    $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
-} catch (PDOException $e) {
-    die("DB connection error: " . $e->getMessage());
 }
 
 // Determine lookup column and value (where in table )
@@ -128,13 +100,22 @@ try {
     <title>Edit Member Profile</title>
     <style>
         body { font-family: Arial, sans-serif; background:#f7f7f7; padding:20px; }
-        form { background:#fff; padding:16px; border-radius:6px; max-width:600px; }
+        .profile-editor > form { background:#fff; padding:16px; border-radius:6px; max-width:600px; }
         input[type=text], input[type=email] { width:100%; padding:8px; margin:6px 0; box-sizing:border-box; }
-        textarea { width:100%; padding:8px; margin:6px 0; box-sizing:border-box; font-family:monospace; }
-        button { padding:8px 14px; }
+        input, textarea {border-radius: 8px; border: none;}
+        textarea {
+                width:100%;
+                padding:8px;
+                margin:6px 0;
+                font-family: monospace;
+        } textarea[readonly] {  color: grey;background-color: lightgrey;}
+        .profile-editor button { padding:8px 14px; border-radius: 8px; border: none;}
+        .profile-editor button:hover {filter: brightness(75%);}
         .message { color:green; }
         .error { color:red; }
         .meta { margin:10px 0; font-size:0.95em; color:#333; }
+        .profile-editor{display: flex; flex-direction: column;}
+        .profile-editor .footer {display: flex; justify-content: space-between;}
     </style>
 </head>
 <body>
@@ -161,9 +142,6 @@ try {
     <label>Address</label>
     <input type="text" name="address" value="<?= htmlspecialchars($member['address']) ?>" required>
 
-    <label>Referral Code Used During Account Creation (read-only)</label>
-    <textarea name="referral" readonly><?= htmlspecialchars($member['referral_code']) ?></textarea>
-
     <div class="meta">
         <strong>Admin:</strong> <?= !empty($member['is_admin']) ? 'Yes' : 'No' ?>
         <?php if (!empty($_SESSION['is_admin'])): ?>
@@ -171,18 +149,22 @@ try {
         <?php endif; ?>
     </div>
 
+    <label>Referral Code (read-only)</label><br/><sub style="color:grey">*Used to invite new members</sub>
+    <textarea name="referral" readonly disabled><?= htmlspecialchars($member['referral_code']) ?></textarea>
+
+
     <label>Verification Matrix (read-only)</label>
-    <textarea rows="5" readonly><?= htmlspecialchars($member['verification_token']) ?></textarea>
+    <textarea rows="5" readonly disabled><?= htmlspecialchars($member['verification_token']) ?></textarea>
+    <div class="footer">
+        <button type="submit">Update</button>
 
-    <button type="submit">Update</button>
-
-    <!-- Delete account: asks for confirmation, posts action=delete -->
-    <form method="post" onsubmit="return confirm('Are you SURE you want to DELETE your account? This cannot be undone.');" style="display:inline">
-        <input type="hidden" name="action" value="delete">
-        <button type="submit" style="background:#c00;color:#fff;border:none;padding:8px 12px;margin-left:12px">Delete Account</button>
-    </form>
-
-    <a href="MemberLogin.php" style="margin-left:12px">Back / Logout</a>
+        <!-- Delete account: asks for confirmation, posts action=delete -->
+        <form method="post" onsubmit="return confirm('Are you SURE you want to DELETE your account? This cannot be undone.');" style="display:inline">
+            <input type="hidden" name="action" value="delete">
+            <button type="submit" style="background:#c00;color:#fff;border:none;padding:8px 12px;margin-left:12px">Delete Account</button>
+        </form>
+    </div>
+    <a href="../pages/MemberLogin.php" style="text-align:center;margin:12px">Back / Logout</a>
 </form>
 
 </body>
