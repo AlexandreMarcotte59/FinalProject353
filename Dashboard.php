@@ -17,7 +17,7 @@ $mem = $stmt_query_contents->fetch(PDO::FETCH_ASSOC);
 
 // 1) Top 3 authors by downloads
 $sqlTopAuthors = "
-    SELECT 
+    SELECT
         COALESCE(m.name_or_username, t.author, 'Unknown') AS author_name,
         COUNT(d.download_id) AS downloads
     FROM Texts t
@@ -32,7 +32,7 @@ $topAuthors = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
 
 // 2) Top 3 titles by views (popularity)
 $sqlTopViewed = "
-    SELECT 
+    SELECT
         title,
         popularity
     FROM Texts
@@ -44,7 +44,7 @@ $topViewedTitles = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
 
 // 3) Top 3 titles by downloads
 $sqlTopDownloadedTitles = "
-    SELECT 
+    SELECT
         t.title,
         COUNT(d.download_id) AS downloads
     FROM Texts t
@@ -58,6 +58,7 @@ $topDownloadedTitles = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <title>Dashboard</title>
     <link rel="stylesheet" href="../style/main.css">
@@ -68,27 +69,33 @@ $topDownloadedTitles = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
             display: flex;
             flex-wrap: wrap;
             gap: 1.2vw;
+            max-width: fit-content;
         }
+
         .stats-card {
             background: var(--bkg-container-clr);
             border-radius: 14px;
             padding: 0;
-            min-width: 230px;
-            max-width: 260px;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.18);
+            min-width: 10vw;
+            max-width: 13vw;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.18);
             transition: transform .15s;
+            max-height: 7vh;
         }
+
         .stats-card:hover {
             transform: scale(1.02);
         }
+
         .stats-card-header {
-            background: var(--clr-dark);
+            background: var(--clr-pop);
             color: white;
             padding: 10px 14px;
             border-radius: 14px 14px 0 0;
             font-weight: bold;
             font-size: 15px;
         }
+
         .stats-card-body {
             padding: 12px 14px;
             font-size: 14px;
@@ -96,44 +103,63 @@ $topDownloadedTitles = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
         }
     </style>
 </head>
+
 <body>
-<?php include("../components/navbar.php"); ?>
+    <?php include("../components/navbar.php"); ?>
 
-<div class="dashboard">
-    <div class="dashboard-top">
+    <div class="dashboard">
+        <div class="dashboard-top">
 
-        <!-- LEFT: PROFILE -->
-        <div class="profile-container">
-            <h3 style="text-align:center">You</h3>
+            <!-- LEFT: PROFILE -->
+            <div class="profile-container">
+                <h3 style="text-align:center">You</h3>
 
-            <div class="profile-data" style="display:flex;flex-direction:column;">
-                <label><em>Name:           </em><span> <?= htmlspecialchars($mem['name_or_username']) ?></span></label>
-                <label><em>Address:        </em><span> <?= htmlspecialchars($mem['address']) ?> </span></label>
-                <label><em>Affiliation:    </em><span> <?= htmlspecialchars($mem['organization']) ?> </span></label>
-                <label><em>Email:          </em><span> <?= htmlspecialchars($mem['recovery_email']) ?> </span></label>
-                <label><em>Total Donated:  </em><span> <?= $_SESSION['total_donated'] ?? "$0.00" ?> </span></label>
-                <label><em>Download / Day: </em><span> <?= htmlspecialchars($_SESSION['downloads_allowed'] . "/" . $_SESSION['downloads_window']) ?> </span></label>
-                <label><em>Referral:       </em><span> <?= htmlspecialchars($mem['referral_code']) ?> </span></label>
+                <div class="profile-data" style="display:flex;flex-direction:column;">
+                    <label><em>Name: </em><span> <?= htmlspecialchars($mem['name_or_username']) ?></span></label>
+                    <label><em>Address: </em><span> <?= htmlspecialchars($mem['address']) ?> </span></label>
+                    <label><em>Affiliation: </em><span> <?= htmlspecialchars($mem['organization']) ?> </span></label>
+                    <label><em>Email: </em><span> <?= htmlspecialchars($mem['recovery_email']) ?> </span></label>
+                    <label><em>Total Donated: </em><span> <?= $_SESSION['total_donated'] ?? "$0.00" ?> </span></label>
+                    <label><em>Download / Day: </em><span>
+                            <?= htmlspecialchars($_SESSION['downloads_allowed'] . "/" . $_SESSION['downloads_window']) ?>
+                        </span></label>
+                    <label><em>Referral: </em><span> <?= htmlspecialchars($mem['referral_code']) ?> </span></label>
 
-                <span class="separator"><hr/>*<hr/></span>
+                    <span class="separator">
+                        <hr />*
+                        <hr />
+                    </span>
 
-                <label><em>Membership:     </em><span> <?= ($mem['is_admin']) ? "Admin" : "Normal" ?>  </span></label>
+                    <label><em>Membership: </em><span> <?= ($mem['is_admin']) ? "Admin" : "Normal" ?> </span></label>
 
-                <?php if (!empty($_SESSION["has_works"])): ?>
-                    <label><em>Total Revenue: </em><span> <?= htmlspecialchars($_SESSION["total_raised"]) ?> </span></label>
-                <?php endif; ?>
+                    <?php if (!empty($_SESSION["has_works"])): ?>
+                        <label><em>Total Revenue: </em><span> <?= htmlspecialchars($_SESSION["total_raised"]) ?>
+                            </span></label>
+                    <?php endif; ?>
 
-                <label><a href="/pages/MyEmail.php"> Email ▶</a></label>
+                    <label><a href="/pages/MyEmail.php"> Email ▶</a></label>
+                </div>
+
+                <form>
+                    <button type="button" onclick="window.location.href='../MemberEdit.php'">Edit Profile</button>
+                    <button type="button">Retract Membership</button>
+                    </form>
             </div>
 
-            <form>
-                <button type="button">Edit Profile</button>
-                <button type="button">Retract Membership</button>
-            </form>
+            <!-- RIGHT: STATS GRIDS -->
+            <div class="work-stats">
+                <?php if ($_SESSION["has_works"]): ?>
+                    <div class="most-popular"></div>
+                    <div class="most-downloaded"></div>
+                    <div class="most-discussed"></div>
+                <?php else: ?>
+                    <p style="text-align: center;">You have not contributed any of your works.</p>
+                </div>
+            <?php endif ?>
         </div>
 
-        <!-- RIGHT: STATS GRIDS -->
-        <div class="work-stats">
+
+        <div class="dashboard-end">
             <h3>CFP Statistics Overview</h3>
 
             <!-- Top 3 Authors by Downloads -->
@@ -148,13 +174,12 @@ $topDownloadedTitles = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
                                 <?= htmlspecialchars($author['author_name']) ?>
                             </div>
                             <div class="stats-card-body">
-                                Downloads: <?= (int)$author['downloads'] ?>
+                                Downloads: <?= (int) $author['downloads'] ?>
                             </div>
                         </div>
                     <?php endforeach; ?>
                 <?php endif; ?>
             </div>
-
             <!-- Top 3 Titles by Views -->
             <h4 style="margin-top:20px;">Top 3 Titles by Views</h4>
             <div class="stats-grid">
@@ -167,13 +192,12 @@ $topDownloadedTitles = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
                                 <?= htmlspecialchars($text['title']) ?>
                             </div>
                             <div class="stats-card-body">
-                                Views: <?= (int)$text['popularity'] ?>
+                                Views: <?= (int) $text['popularity'] ?>
                             </div>
                         </div>
                     <?php endforeach; ?>
                 <?php endif; ?>
             </div>
-
             <!-- Top 3 Titles by Downloads -->
             <h4 style="margin-top:20px;">Top 3 Titles by Downloads</h4>
             <div class="stats-grid">
@@ -186,7 +210,7 @@ $topDownloadedTitles = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
                                 <?= htmlspecialchars($text['title']) ?>
                             </div>
                             <div class="stats-card-body">
-                                Downloads: <?= (int)$text['downloads'] ?>
+                                Downloads: <?= (int) $text['downloads'] ?>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -199,13 +223,5 @@ $topDownloadedTitles = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
                 </a>
             </p>
         </div>
-
-    </div> <!-- /dashboard-top -->
-
-    <div class="dashboard-end">
-        <!-- reserved for extra widgets / activity feed if you want later -->
     </div>
-</div>
-
 </body>
-</html>

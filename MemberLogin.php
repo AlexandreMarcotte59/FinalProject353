@@ -50,19 +50,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $row = $stmt->fetch();
 
             if ($row) {
-                // Normalize: remove all whitespace (spaces, tabs, newlines) so format differences won't break matching
-                $stored = preg_replace('/\s+/', '', (string)$row['verification_token']);
-                $input  = preg_replace('/\s+/', '', (string)$token);
-
-                if (hash_equals($stored, $input)) {
-                    $_SESSION['message'] = "Login successful!";
-                    $_SESSION['user_id'] = $row['user_id'];
-                    $_SESSION['is_admin'] = !empty($row['is_admin']);
-                    if (!empty($row['is_admin'])) {
-                        $_SESSION['admin_message'] = "You are logged in as an administrator.";
-                    }
+                // Do not allow login if the member's verification token is NULL or the literal string "NULL"
+                if ($row['verification_token'] === null || strtoupper(trim((string)$row['verification_token'])) === 'NULL') {
+                    $error = "Account disabled or verification token missing.";
                 } else {
-                    $error = "Invalid name/email/token combination.";
+                    // Normalize: remove all whitespace (spaces, tabs, newlines) so format differences won't break matching
+                    $stored = preg_replace('/\s+/', '', (string)$row['verification_token']);
+                    $input  = preg_replace('/\s+/', '', (string)$token);
+
+                    if (hash_equals($stored, $input)) {
+                        $_SESSION['message'] = "Login successful!";
+                        $_SESSION['user_id'] = $row['user_id'];
+                        $_SESSION['is_admin'] = !empty($row['is_admin']);
+                        if (!empty($row['is_admin'])) {
+                            $_SESSION['admin_message'] = "You are logged in as an administrator.";
+                        }
+                    } else {
+                        $error = "Invalid name/email/token combination.";
+                    }
                 }
             } else {
                 $error = "Invalid name/email/token combination.";

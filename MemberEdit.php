@@ -55,13 +55,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // If the form requested deletion, remove the member row and log out
     if (isset($_POST['action']) && $_POST['action'] === 'delete') {
         try {
-            // Remove the member row (use transaction to be safe)
+            // Resolve numeric user_id (needed to update the row)
+            if ($whereCol === 'user_id') {
+                $target_user_id = (int)$whereVal;
+            } else {
+                $q = $pdo->prepare("SELECT user_id FROM Members WHERE name_or_username = ? LIMIT 1");
+                $q->execute([$whereVal]);
+                $r = $q->fetch();
+                $target_user_id = $r ? (int)$r['user_id'] : null;
+            }
+
+            if ($target_user_id === null) {
+                throw new Exception('Could not resolve member id for account disable.');
+            }
+
+            // TEMP: Do not delete dependent content. Instead null the verification token to "disable" the account.
             $pdo->beginTransaction();
 
-            // NOTE: If other tables reference Members.user_id you may need to delete dependent rows first
-            $sql = "DELETE FROM Members WHERE {$whereCol} = ? LIMIT 1";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([$whereVal]);
+            $stmt = $pdo->prepare("UPDATE Members SET verification_token = NULL WHERE user_id = ? LIMIT 1");
+            $stmt->execute([$target_user_id]);
 
             $pdo->commit();
 
@@ -70,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             session_destroy();
             header('Location: Home.php');
             exit;
-        } catch (PDOException $e) {
+        } catch (Exception $e) {
             if ($pdo->inTransaction()) { $pdo->rollBack(); }
             $error = 'Database error: ' . $e->getMessage();
         }
@@ -175,15 +187,14 @@ try {
     <textarea rows="5" readonly><?= htmlspecialchars($member['verification_token']) ?></textarea>
 
     <button type="submit">Update</button>
-
-    <!-- Delete account: asks for confirmation, posts action=delete -->
-    <form method="post" onsubmit="return confirm('Are you SURE you want to DELETE your account? This cannot be undone.');" style="display:inline">
-        <input type="hidden" name="action" value="delete">
-        <button type="submit" style="background:#c00;color:#fff;border:none;padding:8px 12px;margin-left:12px">Delete Account</button>
-    </form>
-
-    <a href="MemberLogin.php" style="margin-left:12px">Back / Logout</a>
 </form>
 
+<!-- Delete account: asks for confirmation, posts action=delete -->
+<form method="post" onsubmit="return confirm('Are you SURE you want to DELETE your account? This cannot be undone.');" style="display:inline">
+    <input type="hidden" name="action" value="delete">
+    <button type="submit" style="background:#c00;color:#fff;border:none;padding:8px 12px;margin-left:12px">Delete Account</button>
+</form>
+
+<a href="Home.php" style="margin-left:12px">Return to Home Page</a>
 </body>
 </html>
