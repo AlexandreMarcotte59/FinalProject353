@@ -156,10 +156,14 @@ $texts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                     <?php else: ?>
                         <!-- This link will work for TXT, PDF, etc. -->
+                         
+
+                        <?php if ($_SESSION['download_count'] < $_SESSION['downloads_allowed']): ?>
                         <a class="download-btn"
                            href="../download.php?file=<?php echo urlencode($file_web_path); ?>&id=<?php echo (int)$selected_text['text_id']; ?>">
                             ⬇️ Download Text (<?php echo strtoupper($ext); ?>)
                         </a>
+                        <?php endif; ?>
 
                     <?php endif; ?>
                 </div>              
