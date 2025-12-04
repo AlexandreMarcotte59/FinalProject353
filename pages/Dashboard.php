@@ -153,7 +153,7 @@ $topDownloadedTitles = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
                     <div class="most-downloaded"></div>
                     <div class="most-discussed"></div>
                 <?php else: ?>
-                    <p>You have not contributed any of your works.</p>
+                    <p style="text-align: center;">You have not contributed any of your works.</p>
                 </div>
             <?php endif ?>
         </div>
