@@ -154,7 +154,8 @@
         height: fit-content;
         padding: 1dvh;
     }
-    .dashboard-top {display: flex; flex-direction: row; gap:2vw; }
+    .dashboard {height: 100%;}
+    .dashboard-top {display: flex; flex-direction: row; gap:2vw; width: 100%; max-height:60%;}
     .dashboard-top .profile-container {
         background-color: var(--clr-dark);
         border-radius: 10px;
@@ -181,11 +182,29 @@
         border: none;
     }
     .dashboard-top .work-stats {
-            background-color: var(--clr-dark);
-            border-radius: 10px;
-            padding: 5vw;
-            color: white;
+        background-color: var(--clr-dark);
+        border-radius: 10px;
+        padding: 5vw;
+        color: white;
+        width: 100%;
+        max-height: 100%;
     }
+    .dashboard-end {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        min-height: 40%;
+        max-height: 47%;
+        color: white;
+        width: 100%;
+        background-color: var(--clr-dark);
+        border-radius: 8px;
+        padding: 25px;
+        align-content: flex-start;
+        gap: 0 2vw;
+    }
+    .dashboard-end h4 { max-width: 100%;}
+    .dashboard-end h3 {text-align: center;}
     .card-footer {
         justify-content: center;
         display: flex;
