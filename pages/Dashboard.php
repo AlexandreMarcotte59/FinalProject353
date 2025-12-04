@@ -2,7 +2,7 @@
 include_once("../database/db.php"); // sets up $pdo and session
 
 if (!isset($_SESSION['user_id'])) {
-    header("Location: MemberLogin.php");
+    header("Location: /pages/MemberLogin.php");
     exit;
 }
 

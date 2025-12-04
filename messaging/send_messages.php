@@ -1,7 +1,5 @@
 <?php
-session_start();
-include "header.php";
-include "./components/db.php";
+include "../database/db.php";
 
 if (!isset($_SESSION['user_id'])) {
     $_SESSION['user_id'] = 1;
@@ -21,6 +19,11 @@ $stmt->execute([$user_id]);
 $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
+
+<?php 
+include "../components/navbar.php";
+include "includes/header.php";
+?>
 <h2>Sent Messages</h2>
 
 <table>

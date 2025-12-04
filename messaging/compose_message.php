@@ -1,6 +1,5 @@
 <?php 
-session_start();
-include "./components/db.php";
+include "../database/db.php";
 ?>
 
 <h2>Send Message</h2>
