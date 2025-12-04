@@ -159,10 +159,12 @@
     .dashboard-top .profile-container {
         background-color: var(--clr-dark);
         border-radius: 10px;
+        color: white;
         padding: 5vw;
         display:flex;
         flex-direction:column;
-        min-height:50dvh;
+        min-width: fit-content;
+        height:100%;
         justify-content:space-between;
     } .profile-container a {
         text-decoration: none;
