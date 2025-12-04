@@ -140,8 +140,8 @@ $topDownloadedTitles = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
                     <label><a href="/pages/MyEmail.php"> Email ▶</a></label>
                 </div>
 
-                <<form>
-                    <button type="button">Edit Profile</button>
+                <form>
+                    <button type="button" onclick="window.location.href='../MemberEdit.php'">Edit Profile</button>
                     <button type="button">Retract Membership</button>
                     </form>
             </div>
