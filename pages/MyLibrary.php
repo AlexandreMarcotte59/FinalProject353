@@ -6,7 +6,7 @@ $stmt_reader_contents = $pdo->prepare("SELECT * FROM Texts t JOIN Readers r ON t
 $stmt_reader_contents->execute([$user_id]);
 $tuplesRead = $stmt_reader_contents->fetchAll(PDO::FETCH_ASSOC);
 
-$stmt_up_contents = $pdo->prepare("SELECT * FROM Texts WHERE uploader = ?");
+$stmt_up_contents = $pdo->prepare("SELECT * FROM Texts WHERE uploader = ? AND is_member_author = 0");
 $stmt_up_contents->execute([$user_id]);
 $tuplesUp = $stmt_up_contents->fetchAll(PDO::FETCH_ASSOC);
 ?>
@@ -28,8 +28,9 @@ $tuplesUp = $stmt_up_contents->fetchAll(PDO::FETCH_ASSOC);
         <?php  endif ?>
         <?php  foreach ($tuplesRead as $text): ?>
              <div class="card" style="display:flex;flex-direction:column;">
-                <label style="padding:5px;font-variant:small-caps;">Title: "<?= htmlspecialchars($text['title']) ?>"</label>
+                <label style="padding:5px;font-variant:small-caps;" >Title: "<?= htmlspecialchars($text['title']) ?>"</label>
                 <label style="padding:5px;font-variant:small-caps;" >Author: <?= htmlspecialchars($text['author']) ?></label>
+                <label style="padding:5px;font-variant:small-caps;" >Downloader: <?= htmlspecialchars($text['user_id']) ?> (You)</label>
                 <label style="padding:5px;font-variant:small-caps;" >Views: <?= $text['popularity']?></label>
                 <div class="card-footer">
                 <form action="TextViewer.php" method="POST"><button type="submit">View</button>
@@ -43,7 +44,7 @@ $tuplesUp = $stmt_up_contents->fetchAll(PDO::FETCH_ASSOC);
         
         <?php  foreach ($tuplesUp as $text): ?>
              <div class="card" style="display:flex;flex-direction:column;">
-                <label style="padding:5px;font-variant:small-caps;">Title: "<?= htmlspecialchars($text['title']) ?>"</label>
+                <label style="padding:5px;font-variant:small-caps;" >Title: "<?= htmlspecialchars($text['title']) ?>"</label>
                 <label style="padding:5px;font-variant:small-caps;" >Author: <?= htmlspecialchars($text['author']) ?></label>
                 <label style="padding:5px;font-variant:small-caps;" >Uploader: <?= htmlspecialchars($text['uploader']) ?> (You)</label>
                 <label style="padding:5px;font-variant:small-caps;" >Views: <?= $text['popularity']?></label>

@@ -15,7 +15,7 @@ $is_text_uploader_author = $is_member_author->fetchColumn();
 
 
 $commentsStmt = $pdo->prepare("
-    SELECT tc.*, m.username 
+    SELECT tc.*, m.name_or_username 
     FROM TextComments tc
     LEFT JOIN Members m ON tc.reader_id = m.user_id
     WHERE tc.text_id = ?
@@ -23,7 +23,6 @@ $commentsStmt = $pdo->prepare("
 ");
 $commentsStmt->execute([$text_id]);
 $comments = $commentsStmt->fetchAll();
-var_dump($comments);
 ?>
 
 <?php if ($comments): ?>

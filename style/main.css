@@ -27,7 +27,17 @@
         min-height: 100vh;
         overflow: hidden;
     }
-
+    
+    button[type='button']{
+            color: transparent;
+            border: none;
+            border-radius: 0 8px 8px 0;
+    }
+    button[type='button']:hover{
+        filter: sepia(80%) saturate(500%) brightness(90%);
+}
+    textarea:focus { outline: 2px solid var(--clr-pop);}
+    textarea{ border: none; border-radius: 8px 0 0 8px; padding: 5px 1%;}
     .main-container>form {
         border-radius: 20px;
         background-color: var(--bkg-container-clr);
@@ -101,6 +111,14 @@
         padding: 10px 20px;
         min-height: fit-content;
     }    
+    .faq-container {
+            overflow: hidden scroll;
+            display: flex;
+            flex-direction: column;
+            gap: 1%;
+            scrollbar-width: none;
+            max-height: 60%;
+    }
     .faq-container, .faq { width: 100% !important;}
     .cardlist, .faq {
         background-color: var(--clr-pop);
@@ -492,10 +510,11 @@
 
     .viewer:has(pre) {
         overflow-y: scroll;
-        width: 100%;
+        width: 60%;
         background-color: lightgrey;
         border-radius: 8px;
         padding: 1vw;
+        scrollbar-width: none;
     }
 
     .viewer .text-viewer,
@@ -509,7 +528,11 @@
         height: fit-content;
         scrollbar-width: none;
     }
-
+    .answerbox { width: 100%; display: flex; flex-direction: column; gap: 1%;}
+    .answer { width: 100%;}
+    .ans-stats { display: flex; justify-content: space-between; width: 100%; padding: 0 5% 0 1%;}
+    #answer_text { border-radius: 8px 0 0 8px; border: none; background-color: var(--bkg-container-clr); padding: 5px 1%;}
+    #post_answer { border: none; background-color:  var(--bkg-container-clr); border-radius: 0 8px 8px 0; }
     .chatbox {
         height: 100%;
         max-width: 100%;
@@ -590,6 +613,7 @@
         border-radius: 8px;
         overflow-y: scroll;
         scrollbar-width: none;
+        height: 100%;
     }
 
     ::backdrop {

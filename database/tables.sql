@@ -39,7 +39,7 @@ CREATE TABLE Downloads (
     download_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     text_id INT NOT NULL,
-    download_date DATE DEFAULT CURRENT_DATE,
+    download_date DATE DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES Members(user_id),
     FOREIGN KEY (text_id) REFERENCES Texts(text_id)
 );
@@ -122,12 +122,12 @@ CREATE TABLE CommitteeVolunteers (
 CREATE TABLE CommitteeJoinRequests (
     request_id INT,
     committee_id INT,
-    volunteer_id INT,
+    user_id INT,
     status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
-    request_date DATE DEFAULT CURRENT_DATE,
+    request_date DATE DEFAULT (CURRENT_DATE()),
     PRIMARY KEY (request_id),
     FOREIGN KEY (committee_id) REFERENCES Committees(committee_id),
-    FOREIGN KEY (volunteer_id) REFERENCES Members(user_id)
+    FOREIGN KEY (user_id) REFERENCES Members(user_id)
 );
 
 CREATE TABLE MemberAuthor (
@@ -208,5 +208,17 @@ WHERE user_id = NEW.uploader;
 IF uploader_name = NEW.author THEN 
     SET NEW.is_member_author = TRUE;
 END IF;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE PROCEDURE delete_flagged_questions()
+BEGIN
+    DELETE a
+    FROM Answers a
+    JOIN Questions q ON a.question_id = q.question_id
+    WHERE q.flagged = 1;
+
+    DELETE FROM Questions WHERE flagged = 1;
 END$$
 DELIMITER ;

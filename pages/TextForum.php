@@ -5,10 +5,19 @@ $t_id = $_POST['id'] || $_GET['id'];
 $stmt_query_contents = $pdo->prepare("SELECT * FROM Texts WHERE text_id = ?");
 $stmt_query_contents->execute([$t_id]);
 $selected_text = $stmt_query_contents->fetch(PDO::FETCH_ASSOC);
+
 if ($selected_text && !empty($selected_text["filename"])) {
-    $filepath = "/uploads/" . $selected_text["filename"];
-    $file = $ROOTPATH . $filepath;
-    $ext = strtolower(pathinfo($selected_text["filename"], PATHINFO_EXTENSION));
+    // Physical files stored in /uploads at project root
+    $filename = $selected_text["filename"];
+    $filepath = '/uploads/' . $selected_text["filename"];
+    //$file = $ROOTPATH . $filepath;
+    // Web path (used in links)
+    $file_web_path = (BASE_URL ?? '') . $filepath;
+
+    // File system path (used for is_file)
+    $file_fs_path = $ROOTPATH . (BASE_URL ?? '') . $filepath;
+
+    $ext  = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 }
 
 if (isset($_POST['comment_id'])) {

@@ -168,7 +168,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div class="actions">
             <button type="submit" class="btn">Create Committee</button>
-            <a href="/" class="btn btn-secondary">Cancel / Back to Home</a>
+            <a href="<?= BASE_URL?>/" class="btn btn-secondary">Cancel / Back to Home</a>
         </div>
     </form>
 </div>

@@ -24,8 +24,9 @@ if (isset($_SESSION['user_id'])) {
 // If a specific text is requested via ?id=
 // ---------------------
 $selected_text = null;
-$file_web_path = null;   // path used in href for browser
-$file_fs_path  = null;   // path used for is_file() on server
+$filename = '';
+$file_web_path = '';
+$file_fs_path = ''; 
 $ext  = null;
 if (isset($_POST['id'])) {
     $id = (int) $_POST['id'];
@@ -42,13 +43,13 @@ if (isset($_POST['id'])) {
     if ($selected_text && !empty($selected_text["filename"])) {
         // Physical files stored in /uploads at project root
         $filename = $selected_text["filename"];
-        $filepath = "/uploads/" . $selected_text["filename"];
-        $file = $ROOTPATH . $filepath;
+        $filepath = '/uploads/' . $selected_text["filename"];
+        //$file = $ROOTPATH . $filepath;
         // Web path (used in links)
-        $file_web_path = $file;
+        $file_web_path = (BASE_URL ?? '') . $filepath;
 
         // File system path (used for is_file)
-        $file_fs_path = __DIR__ . "/../uploads/" . $filename;
+        $file_fs_path = $ROOTPATH . (BASE_URL ?? '') . $filepath;
 
         $ext  = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
     }
@@ -77,7 +78,7 @@ $texts = $stmt->fetchAll(PDO::FETCH_ASSOC);
         .layout { display: grid; grid-template-columns: 1.3fr 1.7fr; gap: 30px; align-items: flex-start; margin: 10vh auto; }
         /*.text-viewer { border: 1px solid #ccc; padding: 10px; min-height: 400px; background:#fafafa; }*/
         .text-container { width: 100%; min-height: 75dvh; display: flex; flex-direction: column; align-items: center; }
-        .row-container { display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%;}
+        .row-container { display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; padding: calc(var(--navHeight));}
         .text-viewer {width: 70%; height:70%;}
         .text-viewer:has(iframe), .text-container:has(iframe) {height:95%;}
         .row-container:has(iframe) .infocard { height: 5dvh; }
@@ -118,6 +119,8 @@ $texts = $stmt->fetchAll(PDO::FETCH_ASSOC);
         .info-msg { color: #777; font-style: italic; margin-top: 10px; }
         .infocard { margin-bottom: 10px; }
     </style>
+    
+    <link rel="stylesheet" href="../style/main.css">
 </head>
 <body style="flex-direction: column !important;">
     <?php include("../components/navbar.php"); ?>
@@ -136,7 +139,6 @@ $texts = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <strong>Date Published:</strong> <?php echo htmlspecialchars($selected_text["date_published"]); ?>
                     </p>
                 </div>
-
                 <?php include("../components/viewer.php"); ?>
 
                 <!-- DOWNLOAD SECTION -->
@@ -149,19 +151,17 @@ $texts = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <strong>You must be logged in as a member to download this text.</strong>
                         </p>
 
-                    <?php elseif (!$file || !is_file($file)): ?>
+                    <?php elseif (!$file_fs_path || !is_file($file_fs_path)): ?>
                         <p class="info-msg">
                             File not found on the server.
                         </p>
 
                     <?php else: ?>
-                        <!-- This link will work for TXT, PDF, etc. -->
-                         
+                        <!-- This link will work for TXT, PDF, etc. -->                       
 
                         <?php if ($_SESSION['download_count'] < $_SESSION['downloads_allowed']): ?>
-                        <a class="download-btn"
-                           href="../components/download.php?file=<?php echo urlencode($file); ?>&id=<?php echo (int)$selected_text['text_id']; ?>">
-                            ⬇️ Download Text (<?php echo strtoupper($ext); ?>)
+                        <a class="download-btn" onclick="downloadFile('<?=$filename?>', <?=$id?>)">
+                            ⬇️Download Text (<?php echo strtoupper($ext); ?>)
                         </a>
                         <?php endif; ?>
 
@@ -173,3 +173,24 @@ $texts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 </body>
 </html>
+
+<script>
+async function downloadFile(file, id) {
+    const res = await fetch(`../components/download.php?ajax=1&file=${encodeURIComponent(file)}&id=${id}`);
+    if (res.status === 403) {
+        alert("You have already downloaded this file.");
+        return;
+    }
+
+    if (res.status === 404) {
+        alert("File not found.");
+        return;
+    }
+    const link = document.createElement('a');
+        link.href = `../components/download.php?file=${encodeURIComponent(file)}&id=${id}`;
+        link.download = file;
+            document.body.appendChild(link);
+            link.click();
+                document.body.removeChild(link);
+}
+</script>

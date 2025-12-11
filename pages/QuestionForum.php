@@ -23,11 +23,11 @@ $question = $_POST['question'] ?? $q_text['question'];
     <?php include("../components/navbar.php"); ?>
     <div class="data-container" style="height:100%;flex-direction:column!important;justify-content:flex-start;align-content:center;">
         <div class="answer-input" style="align-content:center;">
-            <h1><?= $question ?></h1>
+            <h1 onclick="window.location.href='../pages/FAQ.php'" style="cursor:pointer;"><?= $question ?></h1>
             <form method="POST" action="" class="bar">
                 <input type="hidden" name="question_id" value="<?= $question_id ?>" />
-                <input type="textarea" id="answer_text" cols="20" name="answer" placeholder="Answer here..." />
-                <button type="button" id="post_answer">🔻</button>
+                <textarea id="answer_text" cols="50" rows="2" name="answer" placeholder="Add answer here..."></textarea>
+                <button type="button" id="post_answer" style="color:transparent;text-shadow: 0 0 0 salmon;">➕</button>
             </form>
         </div>
         <div class="answerbox" id="answerbox">

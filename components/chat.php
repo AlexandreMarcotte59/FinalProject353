@@ -15,8 +15,8 @@
     <div class="chat-input">
         <form method="POST" action="" style="display:flex; flex-direction: row;">
             <input type="hidden" name="id" value="<?= $t_id ?>">
-            <input type="textarea" name="comment" placeholder="Comment here..."  id="comment_text" />
-            <button id="post_comment">🔺</button>
+            <textarea cols="45" rows="2" name="comment" placeholder="Comment here..."  id="comment_text" style="background-color: wheat;"></textarea>
+            <button type="button" id="post_comment" style="text-shadow: 0 0 0 salmon;background-color:wheat;">📤</button>
         </form>
     </div>
 

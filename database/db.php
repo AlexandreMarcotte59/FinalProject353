@@ -3,18 +3,18 @@ session_start();
 
 /* Detect local environment reliably */
 $isLocal = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN'
-        || strtoupper(substr(PHP_OS, 0, 3)) === 'DAR'   // macOS (Darwin)
+        || strtoupper(substr(PHP_OS, 0, 3)) === 'DAR'
         || strpos(__DIR__, 'xampp') !== false
         || strpos(__DIR__, 'wamp') !== false
         || strpos(__DIR__, 'mamp') !== false;
 
 if ($isLocal) {
-    define('BASE_URL', '/FinalProject353'); // local project folder
+    define('BASE_URL', '/FinalProject353'); 
     // --- LOCAL DEVELOPMENT ---
     define('DB_HOST', '127.0.0.1');
-    define('DB_USER', 'root');     // local mysql user
-    define('DB_PASS', '');         // local mysql password (usually empty for XAMPP/WAMP)
-    define('DB_NAME', 'mvc353_2'); // your imported local DB name
+    define('DB_USER', 'root');   
+    define('DB_PASS', '');       
+    define('DB_NAME', 'mvc353_2');
 
 } else {
     define('BASE_URL', '');

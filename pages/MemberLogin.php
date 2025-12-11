@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $_SESSION['admin_message'] = "You are logged in as an administrator.";
                     }
                 } else {
-                    $error = "Invalid name/email/token combination.";
+                    $error = "Invalid name/email/token combination. $stored . $input";
                 }
             } else {
                 $error = "Invalid name/email/token combination.";
