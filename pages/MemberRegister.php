@@ -1,25 +1,6 @@
 <?php
-// MemberRegister.php
-//http://localhost/FinalProject353/MemberRegister.php
+include_once("../database/db.php");
 
-// --- Configuration and Connection ---
-define('DB_HOST', 'mvc353.encs.concordia.ca');
-define('DB_USER', 'mvc353_2'); 
-define('DB_PASS', 'firstsound58'); 
-define('DB_NAME', 'mvc353_2'); 
-
-$dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4';
-$options = [
-    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::ATTR_EMULATE_PREPARES => false,
-];
-try {
-    $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
-} catch (\PDOException $e) {
-    die("ERROR: Could not connect to DB. " . $e->getMessage());
-}
-session_start();
 $success_token = "";
 $error = "";
 $admin_confirm = "";
@@ -178,7 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </style>
 </head>
 <body>
-
+<?php include("../components/navbar.php"); ?>
 <form method="POST">
     <h2>Create Member Account</h2>
 

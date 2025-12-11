@@ -11,22 +11,16 @@ if ($selected_text && !empty($selected_text["filename"])) {
     $ext = strtolower(pathinfo($selected_text["filename"], PATHINFO_EXTENSION));
 }
 
-
-$stmt_text_chats = $pdo->prepare("SELECT * FROM TextComments WHERE text_id = ?");
-$stmt_text_chats->execute([$t_id]);
-$chats = $stmt_text_chats->fetch(PDO::FETCH_ASSOC);
-if (isset($_POST["comment"]) && !empty(trim($_POST["comment"]))) {
-    $stmt_new_chat = $pdo->prepare(
-        "INSERT INTO TextComments (reader_id, text_id, comment, date_published) VALUES (?, ?, ?, NOW())"
-    );
-    $stmt_new_chat->execute([$_SESSION["user_id"], $t_id, $_POST["comment"]]);
-    unset($_POST['comment']);
-
-}
 if (isset($_POST['comment_id'])) {
     $stmt = $pdo->prepare("DELETE FROM TextComments WHERE comment_id = ?");
     $stmt->execute([$_POST['comment_id']]);
-    unset($_POST['comment_id']);
+    if (!isset($_GET['text_id'])){
+            header('Location: ' . $_SERVER['REQUEST_URI'] . '?text_id=' . $_POST['id']);
+            exit;
+    } else {
+            header('Location: ' . $_SERVER['REQUEST_URI']);
+            exit;
+    }
 }
 
 ?>

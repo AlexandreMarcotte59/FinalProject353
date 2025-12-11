@@ -58,7 +58,7 @@ if (isset($_POST['id'])) {
 // Fetch ALL texts for the list (from Texts) – currently unused but fine
 // ---------------------
 $stmt = $pdo->query("
-    SELECT text_id, title, author, member_author, filename, popularity, date_published, uploaded_at
+    SELECT text_id, title, author, uploader, filename, popularity, date_published, uploaded_at
     FROM Texts
     ORDER BY uploaded_at DESC
 ");
@@ -131,7 +131,7 @@ $texts = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <h3><?php echo htmlspecialchars($selected_text["title"]); ?></h3>
                     <p>
                         <strong>Author:</strong> <?php echo htmlspecialchars($selected_text["author"]); ?><br>
-                        <strong>Member Author:</strong> <?php echo htmlspecialchars($selected_text["member_author"]); ?><br>
+                        <strong>Member Author:</strong> <?php echo htmlspecialchars($selected_text["uploader"]); ?><br>
                         <strong>Popularity:</strong> <?php echo (int)$selected_text["popularity"]; ?><br>
                         <strong>Date Published:</strong> <?php echo htmlspecialchars($selected_text["date_published"]); ?>
                     </p>

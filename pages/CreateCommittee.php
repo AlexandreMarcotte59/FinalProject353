@@ -1,11 +1,9 @@
-
 <?php
-session_start();
-require_once "./components/db.php"; // defines $pdo
+require_once( "../database/db.php"); // defines $pdo
 
 // 1) Require login
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+    header("Location: ../pages/MemberLogin.php");
     exit;
 }
 
@@ -13,127 +11,74 @@ $currentUserId = (int) $_SESSION['user_id'];
 
 $errors = [];
 $success_message = "";
-$info_message = "";
 $subject = "";
-$selectedVolunteers = [];
+$purpose = "";
 
 // 2) Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $subject = trim($_POST['subject'] ?? '');
-    $selectedVolunteers = $_POST['volunteers'] ?? [];
+    $purpose = trim($_POST['purpose'] ?? '');
 
-    // Basic validation
     if ($subject === '') {
-        $errors[] = "Committee subject is required.";
+        $errors[] = "Committee title (subject) is required.";
     }
-
-    if (empty($selectedVolunteers)) {
-        $errors[] = "Please select at least one volunteer.";
-    }
-
-    // Optionally ensure the creator is in the committee too
-    if (!in_array($currentUserId, $selectedVolunteers, true)) {
-        $selectedVolunteers[] = $currentUserId;
-        $info_message .= "You were automatically added to the committee as a member.<br>";
+    if ($purpose === '') {
+        $errors[] = "Committee purpose is required.";
     }
 
     if (empty($errors)) {
         try {
             $pdo->beginTransaction();
 
-            // 3) Insert into Committee
+            // 1) Insert into Committee
             $stmtCommittee = $pdo->prepare("
-                INSERT INTO Committees (subject)
-                VALUES (:subject)
+                INSERT INTO Committees (subject, purpose, created_by)
+                VALUES (:subject, :purpose, :created_by)
             ");
-            $stmtCommittee->execute([':subject' => $subject]);
+            $stmtCommittee->execute([
+                ':subject'    => $subject,
+                ':purpose'    => $purpose,
+                ':created_by' => $currentUserId
+            ]);
             $committee_id = (int) $pdo->lastInsertId();
 
-            // 4) Insert volunteers into CommitteeVolunteers with duplicate check
-            $alreadyMembers = [];
-            $addedMembers = [];
-
-            $stmtCheck = $pdo->prepare("
-                SELECT 1 FROM CommitteeVolunteers
-                WHERE committee_id = :committee_id AND volunteer_id = :volunteer_id
-            ");
-
+            // 2) Auto-add creator as member of the committee
             $stmtInsert = $pdo->prepare("
                 INSERT INTO CommitteeVolunteers (committee_id, volunteer_id)
                 VALUES (:committee_id, :volunteer_id)
             ");
-
-            foreach ($selectedVolunteers as $volunteer_id) {
-                $volunteer_id = (int) $volunteer_id;
-
-                // Check if already in committee
-                $stmtCheck->execute([
-                    ':committee_id' => $committee_id,
-                    ':volunteer_id' => $volunteer_id
-                ]);
-
-                if ($stmtCheck->fetch()) {
-                    $alreadyMembers[] = $volunteer_id;
-                    continue;
-                }
-
-                // Insert new relation
-                $stmtInsert->execute([
-                    ':committee_id' => $committee_id,
-                    ':volunteer_id' => $volunteer_id
-                ]);
-                $addedMembers[] = $volunteer_id;
-            }
+            $stmtInsert->execute([
+                ':committee_id' => $committee_id,
+                ':volunteer_id' => $currentUserId
+            ]);
 
             $pdo->commit();
-
-            // 5) Build feedback messages
-            if (!empty($addedMembers)) {
-                $success_message = "Committee created successfully!";
-            } else {
-                $errors[] = "No new members were added. All selected members were already part of this committee.";
-            }
-
-            if (!empty($alreadyMembers)) {
-                $info_message .= "Some selected members were already in this committee and were skipped.";
-            }
-
-            // Reset subject/selection after success
-            if ($success_message) {
-                $subject = "";
-                $selectedVolunteers = [];
-            }
-
+            $success_message = "Committee created successfully!";
+            $subject = "";
+            $purpose = "";
         } catch (Exception $e) {
             $pdo->rollBack();
             $errors[] = "Error creating committee: " . $e->getMessage();
         }
     }
 }
-
-// 6) Get all members to show as possible volunteers
-$stmtMembers = $pdo->query("SELECT user_id, username FROM Members ORDER BY username ASC");
-$members = $stmtMembers->fetchAll(PDO::FETCH_ASSOC);
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Create Committee</title>
-    <link rel="stylesheet" href="./style/main.css">
+    <link rel="stylesheet" href="../style/main.css">
 
     <style>
         .page-container {
             max-width: 800px;
-            margin: 30px auto;
-            padding: 20px;
+            margin: 15dvh auto;
+            padding: 5dvh;
             background: #f8f9fa;
             border-radius: 8px;
         }
-        h1 {
-            margin-top: 0;
-        }
+        h1 { margin-top: 0; }
         .btn {
             display: inline-block;
             padding: 8px 16px;
@@ -143,39 +88,26 @@ $members = $stmtMembers->fetchAll(PDO::FETCH_ASSOC);
             text-decoration: none;
             font-weight: 600;
         }
-        .btn:hover {
-            background: #0056b3;
-        }
+        .btn:hover { background: #0056b3; }
         .btn-secondary {
             background: #6c757d;
         }
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
+        .btn-secondary:hover { background: #5a6268; }
+        .form-group { margin-bottom: 15px; }
         label {
             font-weight: 600;
             display: block;
             margin-bottom: 5px;
         }
-        input[type="text"] {
+        input[type="text"], textarea {
             width: 100%;
             padding: 8px;
             border-radius: 4px;
             border: 1px solid #ced4da;
-        }
-        .volunteer-list {
-            max-height: 250px;
-            overflow-y: auto;
-            padding: 10px;
-            border: 1px solid #ced4da;
-            border-radius: 4px;
-            background: white;
-        }
-        .volunteer-item {
-            margin-bottom: 5px;
+        }        
+        textarea {
+            min-height: 120px;
+            resize: vertical;
         }
         .alert {
             padding: 10px 12px;
@@ -192,11 +124,6 @@ $members = $stmtMembers->fetchAll(PDO::FETCH_ASSOC);
             color: #155724;
             border: 1px solid #c3e6cb;
         }
-        .alert-info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
         .actions {
             margin-top: 15px;
             display: flex;
@@ -206,14 +133,7 @@ $members = $stmtMembers->fetchAll(PDO::FETCH_ASSOC);
 </head>
 <body>
 
-<div class="navbar">
-    <div class="left-side">
-        <a href="Home.php" class="btn btn-secondary">← Back to Home</a>
-    </div>
-    <div class="right-side">
-        <a id="logout" href="logout.php">Log Out</a>
-    </div>
-</div>
+    <?php include("../components/navbar.php"); ?>
 
 <div class="page-container">
     <h1>Create a New Committee</h1>
@@ -230,50 +150,25 @@ $members = $stmtMembers->fetchAll(PDO::FETCH_ASSOC);
 
     <?php if ($success_message): ?>
         <div class="alert alert-success">
-            <?= $success_message ?>
-        </div>
-    <?php endif; ?>
-
-    <?php if ($info_message): ?>
-        <div class="alert alert-info">
-            <?= $info_message ?>
+            <?= htmlspecialchars($success_message) ?>
         </div>
     <?php endif; ?>
 
     <form method="post">
         <div class="form-group">
-            <label for="subject">Committee Subject</label>
+            <label for="subject">Committee Title</label>
             <input type="text" id="subject" name="subject"
-                   value="<?= htmlspecialchars($subject) ?>"
-                   required>
+                   value="<?= htmlspecialchars($subject) ?>" required>
         </div>
 
         <div class="form-group">
-            <label>Select Volunteers (members)</label>
-            <div class="volunteer-list">
-                <?php if (empty($members)): ?>
-                    <p>No members available.</p>
-                <?php else: ?>
-                    <?php foreach ($members as $m): ?>
-                        <div class="volunteer-item">
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    name="volunteers[]"
-                                    value="<?= (int)$m['user_id']; ?>"
-                                    <?= in_array($m['user_id'], $selectedVolunteers, true) ? 'checked' : ''; ?>
-                                >
-                                <?= htmlspecialchars($m['username']); ?> (ID: <?= (int)$m['user_id']; ?>)
-                            </label>
-                        </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
+            <label for="purpose">Committee Purpose</label>
+            <textarea id="purpose" name="purpose" required><?= htmlspecialchars($purpose) ?></textarea>
         </div>
 
         <div class="actions">
             <button type="submit" class="btn">Create Committee</button>
-            <a href="Home.php" class="btn btn-secondary">Cancel / Back to Home</a>
+            <a href="/" class="btn btn-secondary">Cancel / Back to Home</a>
         </div>
     </form>
 </div>

@@ -2,6 +2,7 @@
 include_once("database/db.php");
 
 // Handle Texts queries
+$search_result_msg = null;
 $sql_query_popular = "select * from Texts order by popularity desc limit 6";
 $result_pop = $pdo->query($sql_query_popular);
 $top6P = $result_pop->fetchAll(PDO::FETCH_ASSOC);
@@ -132,15 +133,15 @@ if (isset($_POST['search'])) {
             <?php if ($is_member): ?>
                 <a id="login" onclick="window.location='components/logout.php'">Log Out</a>
             <?php else: ?>
-                <a id="login" href="./pages/MemberLogin.php">Log In</a>
-                <a id="signup" href="./pages/MemberRegister.php">Sign Up</a>
+                <a id="login" href="pages/MemberLogin.php">Log In</a>
+                <a id="signup" href="pages/MemberRegister.php">Sign Up</a>
             <?php endif; ?>
         </div>
     </div>
 
     <div class="main-container">
-        <h1>CopyForward Publishing</h1>
         <form class="search-form" method="POST" action="Home.php">
+        <h1>CopyForward Publishing</h1>
             <div class="bar">
                 <input type="search" name="search" value="<?= isset($_POST['search']) ? $_POST['search'] : '' ?>"
                     placeholder='Enter query...' />

@@ -4,7 +4,7 @@ include_once('../database/db.php');
 // Require login: accept either numeric user_id or member_name set by login code
 //Redirect to login page if not logged in
 if (empty($_SESSION['user_id']) && empty($_SESSION['member_name'])) {
-    header('Location: MemberLogin.php');
+    header('Location: ' . BASE_URL . '/pages/MemberLogin.php');
     exit;
 }
 
@@ -99,8 +99,8 @@ try {
     <meta charset="utf-8">
     <title>Edit Member Profile</title>
     <style>
-        body { font-family: Arial, sans-serif; background:#f7f7f7; padding:20px; }
-        .profile-editor > form { background:#fff; padding:16px; border-radius:6px; max-width:600px; }
+        body { font-family: Arial, sans-serif; background:#f7f7f7; padding: calc(2*var(--navHeight)) 20px; }
+        .profile-editor > form { background: var(--clr-pop); padding:16px; border-radius:8px; max-width:600px; }
         input[type=text], input[type=email] { width:100%; padding:8px; margin:6px 0; box-sizing:border-box; }
         input, textarea {border-radius: 8px; border: none;}
         textarea {
@@ -116,11 +116,13 @@ try {
         .meta { margin:10px 0; font-size:0.95em; color:#333; }
         .profile-editor{display: flex; flex-direction: column;}
         .profile-editor .footer {display: flex; justify-content: space-between;}
-    </style>
+    </style>    
+    <link rel="stylesheet" href="../style/main.css">
 </head>
 <body>
-
-<h2>Edit Profile</h2>
+<?php include("../components/navbar.php"); ?>
+<div class="profile-editor">
+<h2 style="text-align:center;">Edit Profile</h2>
 
 <?php if ($error): ?>
     <div class="error"><?= htmlspecialchars($error) ?></div>
@@ -166,6 +168,6 @@ try {
     </div>
     <a href="../pages/MemberLogin.php" style="text-align:center;margin:12px">Back / Logout</a>
 </form>
-
+</div>
 </body>
 </html>

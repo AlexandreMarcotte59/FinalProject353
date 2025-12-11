@@ -1,5 +1,5 @@
-<?php 
-include "../database/db.php";
+<?php
+include_once( "../database/db.php");
 ?>
 
 <h2>Compose Message</h2>
@@ -9,15 +9,15 @@ include "../database/db.php";
     <label>To:</label><br>
     <select name="recipient_id" required>
         <?php
-        
-        $stmt = $pdo->prepare("SELECT user_id, username FROM users WHERE user_id != ?");
-        $stmt->execute([$_SESSION['user_id']]);
-        $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        foreach ($users as $u):
-        ?>
+        $stmt = $pdo->prepare("SELECT user_id, name_or_username FROM Members WHERE user_id != ?");
+        $stmt->execute([$_SESSION['user_id']]);
+                $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                foreach ($users as $u):
+                                ?>
             <option value="<?= $u['user_id'] ?>">
-                <?= htmlspecialchars($u['username']) ?>
+                <?= htmlspecialchars($u['name_or_username']) ?>
             </option>
         <?php endforeach; ?>
     </select>
@@ -32,5 +32,5 @@ include "../database/db.php";
     <button type="submit">Send</button>
 </form>
 
-<br>
-<button onclick="window.close()">Cancel</button>
+<br/>
+<button class="closeDialog">Cancel</button>

@@ -106,9 +106,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: red;
         }
     </style>
+    <link rel="stylesheet" href="../style/main.css">
 </head>
 <body>
-
 <form method="POST" action="">
     <h2>Member Login</h2>
 
@@ -128,6 +128,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
         <?php unset($_SESSION['message']); ?>
     <?php endif; ?>
+
+    <!-- ⭐  BACK TO HOME BUTTON (added) ⭐  -->
+    <div style="text-align:center; margin-top:15px;">
+        <a href="<?=BASE_URL?>/Home.php"
+           style="
+               display:inline-block;
+               padding:10px 16px;
+               background:#28a745;
+               color:white;
+               border-radius:5px;
+               text-decoration:none;
+               font-weight:bold;
+           ">
+            ⬅ Back to Home
+        </a>
+    </div>
+
 </form>
 
 </body>

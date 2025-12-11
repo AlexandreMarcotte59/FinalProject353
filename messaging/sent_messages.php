@@ -1,8 +1,8 @@
 <?php
-include "../database/db.php";
+include_once( "../database/db.php");
 
 if (!isset($_SESSION['user_id'])) {
-    $_SESSION['user_id'] = 1;
+        $_SESSION['user_id'] = 1;
 }
 
 $user_id = $_SESSION['user_id'];
@@ -37,4 +37,3 @@ $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <?php endforeach; ?>
 
 </table>
-

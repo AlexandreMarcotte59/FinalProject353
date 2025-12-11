@@ -40,7 +40,7 @@
         flex-direction: column;
     }
 
-    .main-container .bar {
+    form.bar, form .bar {
         display: flex;
         flex-direction: row !important;
         justify-content: center;
@@ -54,7 +54,7 @@
     }
 
     .main-container {
-        height: 100dvh;
+        height: 100dvh; width: 80dvw; justify-content: center;
     }
 
     .data-container,
@@ -87,13 +87,11 @@
         margin: 0 !important;
         padding: 0 !important;
     }
-    
     .card label { padding:5px; font-variant:small-caps; }
     .card:hover {
         transform: scale(1.05);
         filter: saturate(50%);
     }
-
     .card {
         background-color: sandybrown;
         width: fit-content;
@@ -102,8 +100,19 @@
         border-radius: 20px;
         padding: 10px 20px;
         min-height: fit-content;
+    }    
+    .faq-container, .faq { width: 100% !important;}
+    .cardlist, .faq {
+        background-color: var(--clr-pop);
+        width: 100%;
+        border-radius: 10px;
+        padding: 10px;
+        height: fit-content;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        margin-bottom: 1%;
     }
-
     .home-container {
         overflow: hidden auto;
         max-height: 60%;
@@ -113,6 +122,7 @@
         scrollbar-width: none;
         flex-wrap: nowrap;
         flex-direction: column !important;
+        justify-content: flex-start !important;
     }
 
     .home-container h4 {
@@ -299,7 +309,7 @@
     }
 
     .card-footer {
-        justify-content: center;
+        justify-content: space-around;
         display: flex;
         flex-direction: row;
     }
@@ -386,7 +396,7 @@
         color: var(--clr-pop);
     }
 
-    .search-form input[type="text"] {
+    .search-form input {
         flex-grow: 1;
         padding: 10px;
         border: 1px solid #ddd;
@@ -439,7 +449,7 @@
         background-color: sandybrown;
     }
 
-    .sidebar .btn-2 {
+    .sidebar .btn-1 {
         background-color: var(--clr-pop);
     }
 

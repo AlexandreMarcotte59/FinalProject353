@@ -1,6 +1,7 @@
 <?php
     include("database/db.php");
     $request = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    $request = preg_replace('#^' . BASE_URL . '#', '', $request);
     $request = rtrim($request, '/');
     $parts = explode('/', $request);
     $last = '/' . end($parts);

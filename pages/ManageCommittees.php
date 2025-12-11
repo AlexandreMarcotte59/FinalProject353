@@ -1,9 +1,8 @@
 <?php
-session_start();
-require_once "./components/db.php";
+require_once "../database/db.php";
 
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+    header("Location: /pages/MemberLogin.php");
     exit;
 }
 
@@ -333,7 +332,7 @@ foreach ($committees as $c) {
 <head>
     <meta charset="UTF-8">
     <title>Manage Committees</title>
-    <link rel="stylesheet" href="./style/main.css">
+    <link rel="stylesheet" href="../style/main.css">
     <style>
         .page-container {
             max-width: 1000px;
@@ -433,14 +432,11 @@ foreach ($committees as $c) {
         .pending-item:last-child {
             border-bottom: none;
         }
-    </style>
+    </style>    
 </head>
 <body>
 
-<div class="navbar">
-    <a href="Home.php" class="btn btn-secondary">← Back to Home</a>
-</div>
-
+<?php include("../components/navbar.php"); ?>
 <div class="page-container">
     <h1>Manage Committees</h1>
 

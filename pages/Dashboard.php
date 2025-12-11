@@ -21,7 +21,7 @@ $sqlTopAuthors = "
         COALESCE(m.name_or_username, t.author, 'Unknown') AS author_name,
         COUNT(d.download_id) AS downloads
     FROM Texts t
-    LEFT JOIN Members m ON t.member_author = m.user_id
+    LEFT JOIN Members m ON t.uploader = m.user_id
     LEFT JOIN Downloads d ON t.text_id = d.text_id
     GROUP BY author_name
     ORDER BY downloads DESC
@@ -125,23 +125,20 @@ $topDownloadedTitles = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
                         </span></label>
                     <label><em>Referral: </em><span> <?= htmlspecialchars($mem['referral_code']) ?> </span></label>
 
-                    <span class="separator">
-                        <hr />*
-                        <hr />
-                    </span>
+                    <span class="separator"><hr />*<hr /></span>
 
                     <label><em>Membership: </em><span> <?= ($mem['is_admin']) ? "Admin" : "Normal" ?> </span></label>
 
                     <?php if (!empty($_SESSION["has_works"])): ?>
                         <label><em>Total Revenue: </em><span> <?= htmlspecialchars($_SESSION["total_raised"]) ?>
                             </span></label>
-                    <?php endif; ?>
+                    <?php endif; ?> 
 
-                    <label><a href="/pages/MyEmail.php"> Inbox ▶</a></label>
+                    <label><a href="<?= BASE_URL ?>/messaging/inbox.php"> Inbox ▶</a></label>
                 </div>
 
                 <form>
-                    <a href='../pages/MemberEdit.php'>Edit Profile ▶</a>
+                    <a href='<?= BASE_URL ?>/pages/MemberEdit.php'>Edit Profile ▶</a>
                 </form>
             </div>
 

@@ -20,16 +20,16 @@ $stmt->execute([$user_id]);
 $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<?php include "../components/navbar.php"; ?>
+<?php include("../components/navbar.php"); ?>
 
 <div class="inbox">
-    <?php include "includes/header.php"; ?>
+    <?php include("includes/header.php"); ?>
     <h2 style="text-align: center;">Inbox</h2>
     <div class="inbox-container">
         <nav>
             <!--<a href="inbox.php">Inbox</a> |-->
             <a onclick="modalHandler('compose_message')" target="_blank">Compose</a>
-            <a onclick="modalHandler('sent_messages')" target="_blank">Sent</a>
+            <a onclick="modalHandler('sent_messages')"  target="_blank">Sent ▶</a>
         </nav>
 
         <hr>
@@ -55,7 +55,7 @@ $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <?php endforeach; ?>
                 </tbody>
             </table>
-            <?php include "footer.php"; ?>
+            <?php include( "includes/footer.php"); ?>
         </div>
     </div>
     <dialog id="compose_message">

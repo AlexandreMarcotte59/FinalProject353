@@ -82,12 +82,9 @@ $pendingRequests = $stmt_pending->fetchAll(PDO::FETCH_ASSOC);
     </style>
 </head>
 <body>
-    <div class="navbar">
-        <a href="Home.php" class="btn btn-secondary">← Back to Home</a>
-    </div>
+    <?php include("../components/navbar.php"); ?>    
 
-
-    <div class="data-container">
+    <div class="text-container">
 
         <!-- Committees you created -->
         <div class="section-title">Committees You Created</div>
