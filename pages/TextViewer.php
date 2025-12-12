@@ -186,6 +186,10 @@ async function downloadFile(file, id) {
         alert("File not found.");
         return;
     }
+    if (res.status === 405) {
+        alert("Download limit reached.");
+        return;
+    }
     const link = document.createElement('a');
         link.href = `../components/download.php?file=${encodeURIComponent(file)}&id=${id}`;
         link.download = file;

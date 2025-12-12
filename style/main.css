@@ -28,7 +28,7 @@
         overflow: hidden;
     }
     
-    button[type='button']{
+    button[type='button']:not(.btn){
             color: transparent;
             border: none;
             border-radius: 0 8px 8px 0;

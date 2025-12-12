@@ -67,7 +67,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["delete_id"])) {
     $has_row = $stmt->fetch();
     $stmt->close();
 
-    if ($has_row) {
+
+    if ($has_row && !isset($_SESSION['is_admin'])) {
         if ($filename_to_delete) {
             $file_path = "../uploads/" . $filename_to_delete;
             if (is_file($file_path)) {
@@ -85,8 +86,35 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["delete_id"])) {
         $stmt->close();
 
         $upload_message = "Upload deleted successfully.";
-    } else {
-        // Either doesn't exist or doesn't belong to this user
+    } 
+    else {
+        $upload_message = "Cannot delete this upload (not found or not yours).";
+    }
+    
+    if (isset($_SESSION['is_admin'])){        
+        $stmtAll = $conn->prepare("SELECT filename FROM Texts WHERE text_id = ? ");
+        $stmtAll->bind_param("i", $delete_id);
+        $stmtAll->execute();
+        $stmtAll->bind_result($filename_to_delete);
+        $has_admin_row = $stmtAll->fetch();
+        $stmtAll->close();
+        if ($filename_to_delete) {
+            $file_path = "../uploads/" . $filename_to_delete;
+            if (is_file($file_path)) {
+                unlink($file_path);
+            }
+        }
+        $stmt = $conn->prepare("
+            DELETE FROM Texts 
+            WHERE text_id = ?
+        ");
+        $stmt->bind_param("i", $delete_id);
+        $stmt->execute();
+        $stmt->close();
+
+        $upload_message = "Upload deleted successfully.";
+    }    
+    else {
         $upload_message = "Cannot delete this upload (not found or not yours).";
     }
 }
@@ -185,6 +213,14 @@ $stmt = $conn->prepare("
 $stmt->bind_param("i", $currentMemberId);
 $stmt->execute();
 $result = $stmt->get_result();
+
+$stmtA = $conn->prepare("
+    SELECT text_id, title, author, uploader, filename, popularity, date_published, uploaded_at
+    FROM Texts
+   ORDER BY uploaded_at DESC
+");
+$stmtA->execute();
+$resultAdmin = $stmtA->get_result();
 ?>
 <!DOCTYPE html>
 <html>
@@ -221,7 +257,7 @@ $result = $stmt->get_result();
 <body>
 <?php include_once("../components/navbar.php"); ?>
 
-<div class="section-container" style="padding: var(--navHeight); display: flex; flex-direction: column;">
+<div class="section-container" style="padding: var(--navHeight); display: flex; flex-direction: column;height:100%;">
     <div class="left">
         <h1>Upload a Text or PDF File</h1>
 
@@ -253,7 +289,7 @@ $result = $stmt->get_result();
 
     <div class="right">
         <h2>Uploaded Files</h2>
-         <table>
+         <table style="overflow: hidden scroll;display: block;height: 60%;scrollbar-width: none;">
             <tr>
                 <th>ID</th>
                 <th>Title</th>
@@ -265,32 +301,55 @@ $result = $stmt->get_result();
                 <th>Uploaded At</th>
                 <th>Actions</th>
             </tr>
-            <?php if ($result && $result->num_rows > 0): ?>
-                <?php while ($row = $result->fetch_assoc()) { ?>
-                    <tr>
+            <?php if ($_SESSION['is_admin']): ?>
+                <?php if ($resultAdmin && $resultAdmin->num_rows > 0): ?>
+                    <?php while ($row = $resultAdmin->fetch_assoc()) { ?>
+                        <tr>
                         <td><?php echo $row["text_id"]; ?></td>
                         <td><?php echo htmlspecialchars($row["title"]); ?></td>
                         <td><?php echo htmlspecialchars($row["author"]); ?></td>
-                        <!-- All rows belong to this member, so show their name -->
                         <td><?php echo htmlspecialchars($currentMemberName); ?></td>
-                        <td>
-                            <a href="../uploads/<?php echo htmlspecialchars($row["filename"]); ?>" target="_blank">
-                                <?php echo htmlspecialchars($row["filename"]); ?>
-                            </a>
-                        </td>
+                        <td> <a href="../uploads/<?php echo htmlspecialchars($row["filename"]); ?>" target="_blank"><?php echo htmlspecialchars($row["filename"]); ?> </a></td>
                         <td><?php echo $row["popularity"]; ?></td>
                         <td><?php echo $row["date_published"]; ?></td>
                         <td><?php echo $row["uploaded_at"]; ?></td>
                         <td>
-                            <form method="post" class="inline" onsubmit="return confirm('Delete this upload?');">
-                                <input type="hidden" name="delete_id" value="<?php echo (int)$row['text_id']; ?>">
-                                <button type="submit">Delete</button>
-                            </form>
-                        </td>
-                    </tr>
-                <?php } ?>
+                        <form method="post" class="inline" onsubmit="return confirm('Delete this upload?');">
+                        <input type="hidden" name="delete_id" value="<?php echo (int)$row['text_id']; ?>">
+                        <button type="submit">Delete</button></form></td>
+                        </tr>
+                    <?php } ?>
+                <?php else: ?>
+                    <tr><td colspan="9">No uploads yet.</td></tr>
+                <?php endif; ?>
             <?php else: ?>
-                <tr><td colspan="9">No uploads yet.</td></tr>
+                <?php if ($result && $result->num_rows > 0): ?>
+                    <?php while ($row = $result->fetch_assoc()) { ?>
+                        <tr>
+                            <td><?php echo $row["text_id"]; ?></td>
+                            <td><?php echo htmlspecialchars($row["title"]); ?></td>
+                            <td><?php echo htmlspecialchars($row["author"]); ?></td>
+                            <!-- All rows belong to this member, so show their name -->
+                            <td><?php echo htmlspecialchars($currentMemberName); ?></td>
+                            <td>
+                                <a href="../uploads/<?php echo htmlspecialchars($row["filename"]); ?>" target="_blank">
+                                    <?php echo htmlspecialchars($row["filename"]); ?>
+                                </a>
+                            </td>
+                            <td><?php echo $row["popularity"]; ?></td>
+                            <td><?php echo $row["date_published"]; ?></td>
+                            <td><?php echo $row["uploaded_at"]; ?></td>
+                            <td>
+                                <form method="post" class="inline" onsubmit="return confirm('Delete this upload?');">
+                                    <input type="hidden" name="delete_id" value="<?php echo (int)$row['text_id']; ?>">
+                                    <button type="submit">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <?php } ?>
+                <?php else: ?>
+                    <tr><td colspan="9">No uploads yet.</td></tr>
+                <?php endif; ?>
             <?php endif; ?>
         </table>
     </div>

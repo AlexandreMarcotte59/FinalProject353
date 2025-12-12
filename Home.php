@@ -22,9 +22,9 @@ if (!isset($_SESSION['user_id'])) {
 } else {
     $is_member = true;
     $user_id = $_SESSION['user_id'];
-    $stmt_query_user = $pdo->prepare("SELECT 1 FROM Members WHERE user_id = ?");
+    $stmt_query_user = $pdo->prepare("SELECT * FROM Members WHERE user_id = ?");
     $stmt_query_user->execute([$user_id]);
-    $user_tuple = $stmt_query_user->fetch(PDO::FETCH_ASSOC);
+    $user_tuple = $stmt_query_user->fetchAll(PDO::FETCH_ASSOC);
 
     // Compute donations
     $stmt = $pdo->prepare("SELECT SUM(quantity) FROM Donations WHERE user_id=?");
@@ -58,8 +58,8 @@ if (!isset($_SESSION['user_id'])) {
         $_SESSION['download_count'] = $recent;
         $_SESSION['downloads_allowed'] = $downloads_allowed;
         $_SESSION['downloads_window'] = $effective_window;
-    } else {
-        // deny download
+    } else {        
+        $_SESSION['downloads_capped'] = true;
     }
 }
 
@@ -93,13 +93,6 @@ if (isset($_POST['search'])) {
 <head>
     <title>Home</title>
     <script>
-        /*document.querySelectorAll("[data-dialog]").forEach(btn => {
-            btn.addEventListener("click", () => {        
-                const dialog = document.querySelector(`#${ btn.dataset.dialog }`);   
-                dialog.showModal();                
-                dialog.querySelector(".closeDialog").addEventListener("click", () => dialog.close());            
-            });
-        });*/
         function modalHandler(elemid) {
             let dialog = document.querySelector(`#${elemid}`);
             if (!dialog) {

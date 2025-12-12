@@ -13,6 +13,40 @@ $stmt_query_contents = $pdo->prepare("SELECT * FROM Members WHERE user_id = ?");
 $stmt_query_contents->execute([$user_id]);
 $mem = $stmt_query_contents->fetch(PDO::FETCH_ASSOC);
 
+$stmt_works = $pdo->prepare("SELECT * FROM Texts WHERE is_member_author = 1 AND uploader = ?");
+$stmt_works->execute([$user_id]);
+$works = $stmt_works->fetchAll(PDO::FETCH_ASSOC);
+if (count($works) > 0) {
+    $_SESSION['has_works'] = true;
+}
+function top3($pdo, $user_id, $column)
+{
+    $stmt = $pdo->prepare("
+        SELECT *
+        FROM Texts
+        WHERE  is_member_author = 1 AND uploader = ?
+        ORDER BY $column DESC
+        LIMIT 3
+    ");
+    $stmt->execute([$user_id]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+$topMyDownloaded = top3($pdo, $user_id, "downloads");
+$topMyViewed = top3($pdo, $user_id, "popularity");
+
+$stmt = $pdo->prepare("
+        SELECT t.*, COUNT(tc.comment_id) AS comment_count
+        FROM Texts t
+        JOIN TextComments tc ON t.text_id = tc.text_id
+        WHERE t.is_member_author = 1 AND t.uploader = ?
+        GROUP BY t.text_id
+        ORDER BY comment_count DESC
+        LIMIT 3
+    ");
+$stmt->execute([$user_id]);
+$topMyDiscussed = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 // ---- Top 3 stats for dashboard (for everyone) ----
 
 // 1) Top 3 authors by downloads
@@ -125,14 +159,17 @@ $topDownloadedTitles = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
                         </span></label>
                     <label><em>Referral: </em><span> <?= htmlspecialchars($mem['referral_code']) ?> </span></label>
 
-                    <span class="separator"><hr />*<hr /></span>
+                    <span class="separator">
+                        <hr />*
+                        <hr />
+                    </span>
 
                     <label><em>Membership: </em><span> <?= ($mem['is_admin']) ? "Admin" : "Normal" ?> </span></label>
 
                     <?php if (!empty($_SESSION["has_works"])): ?>
                         <label><em>Total Revenue: </em><span> <?= htmlspecialchars($_SESSION["total_raised"]) ?>
                             </span></label>
-                    <?php endif; ?> 
+                    <?php endif; ?>
 
                     <label><a href="<?= BASE_URL ?>/messaging/inbox.php"> Inbox ▶</a></label>
                 </div>
@@ -143,81 +180,134 @@ $topDownloadedTitles = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
             </div>
 
             <!-- RIGHT: STATS GRIDS -->
-            <div class="work-stats">
+            <div class="work-stats" style="display:flex;justify-content:space-around;padding:var(--navHeight)!important;">
                 <?php if ($_SESSION["has_works"]): ?>
-                    <div class="most-popular"></div>
-                    <div class="most-downloaded"></div>
-                    <div class="most-discussed"></div>
+                    <div class="most-popular">
+                        <h4>Top 3 Works by Downloads</h4>
+                        <div class="stats-grid">
+                            <?php if (empty($topMyDownloaded)): ?>
+                                <p>No download data available.</p>
+                            <?php else: ?>
+                                <?php foreach ($topMyDownloaded as $d): ?>
+                                    <div class="stats-card">
+                                        <div class="stats-card-header">
+                                            <?= htmlspecialchars($d['title']) ?>
+                                        </div>
+                                        <div class="stats-card-body">
+                                            Downloads: <?= (int) $d['downloads'] ?>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <div class="most-downloaded">
+                        <h4>Top 3 Titles by Views</h4>
+                        <div class="stats-grid">
+                            <?php if (empty($topMyViewed)): ?>
+                                <p>No view data available.</p>
+                            <?php else: ?>
+                                <?php foreach ($topMyViewed as $text): ?>
+                                    <div class="stats-card">
+                                        <div class="stats-card-header">
+                                            <?= htmlspecialchars($text['title']) ?>
+                                        </div>
+                                        <div class="stats-card-body">
+                                            Views: <?= (int) $text['popularity'] ?>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <div class="most-discussed">
+                        <h4>Top 3 Titles by Discussion</h4>
+                            <div class="stats-grid">
+                                <?php if (empty($topMyDiscussed)): ?>
+                                    <p>No discussion data available.</p>
+                                <?php else: ?>
+                                    <?php foreach ($topMyDiscussed as $text): ?>
+                                        <div class="stats-card">
+                                            <div class="stats-card-header">
+                                                <?= htmlspecialchars($text['title']) ?>
+                                            </div>
+                                            <div class="stats-card-body">
+                                                Chats: <?= (int) $text['popularity'] ?>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                    </div>
                 <?php else: ?>
                     <p style="text-align: center;">You have not contributed any of your works.</p>
+                <?php endif ?>
+            </div>
+
+
+            <div class="dashboard-end">
+                <h3>CFP Statistics Overview</h3>
+
+                <!-- Top 3 Authors by Downloads -->
+                <h4 style="margin-top:10px;">Top 3 Authors by Downloads</h4>
+                <div class="stats-grid">
+                    <?php if (empty($topAuthors)): ?>
+                        <p>No author download data available.</p>
+                    <?php else: ?>
+                        <?php foreach ($topAuthors as $author): ?>
+                            <div class="stats-card">
+                                <div class="stats-card-header">
+                                    <?= htmlspecialchars($author['author_name']) ?>
+                                </div>
+                                <div class="stats-card-body">
+                                    Downloads: <?= (int) $author['downloads'] ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
-            <?php endif ?>
+                <!-- Top 3 Titles by Views -->
+                <h4 style="margin-top:20px;">Top 3 Titles by Views</h4>
+                <div class="stats-grid">
+                    <?php if (empty($topViewedTitles)): ?>
+                        <p>No view data available.</p>
+                    <?php else: ?>
+                        <?php foreach ($topViewedTitles as $text): ?>
+                            <div class="stats-card">
+                                <div class="stats-card-header">
+                                    <?= htmlspecialchars($text['title']) ?>
+                                </div>
+                                <div class="stats-card-body">
+                                    Views: <?= (int) $text['popularity'] ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+                <!-- Top 3 Titles by Downloads -->
+                <h4 style="margin-top:20px;">Top 3 Titles by Downloads</h4>
+                <div class="stats-grid">
+                    <?php if (empty($topDownloadedTitles)): ?>
+                        <p>No download data available.</p>
+                    <?php else: ?>
+                        <?php foreach ($topDownloadedTitles as $text): ?>
+                            <div class="stats-card">
+                                <div class="stats-card-header">
+                                    <?= htmlspecialchars($text['title']) ?>
+                                </div>
+                                <div class="stats-card-body">
+                                    Downloads: <?= (int) $text['downloads'] ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+
+                <p style="margin-top:15px;">
+                    <a href="../Statistics.php" style="color: var(--clr-pop); text-decoration:none;">
+                        View full stats &raquo;
+                    </a>
+                </p>
+            </div>
         </div>
-
-
-        <div class="dashboard-end">
-            <h3>CFP Statistics Overview</h3>
-
-            <!-- Top 3 Authors by Downloads -->
-            <h4 style="margin-top:10px;">Top 3 Authors by Downloads</h4>
-            <div class="stats-grid">
-                <?php if (empty($topAuthors)): ?>
-                    <p>No author download data available.</p>
-                <?php else: ?>
-                    <?php foreach ($topAuthors as $author): ?>
-                        <div class="stats-card">
-                            <div class="stats-card-header">
-                                <?= htmlspecialchars($author['author_name']) ?>
-                            </div>
-                            <div class="stats-card-body">
-                                Downloads: <?= (int) $author['downloads'] ?>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
-            <!-- Top 3 Titles by Views -->
-            <h4 style="margin-top:20px;">Top 3 Titles by Views</h4>
-            <div class="stats-grid">
-                <?php if (empty($topViewedTitles)): ?>
-                    <p>No view data available.</p>
-                <?php else: ?>
-                    <?php foreach ($topViewedTitles as $text): ?>
-                        <div class="stats-card">
-                            <div class="stats-card-header">
-                                <?= htmlspecialchars($text['title']) ?>
-                            </div>
-                            <div class="stats-card-body">
-                                Views: <?= (int) $text['popularity'] ?>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
-            <!-- Top 3 Titles by Downloads -->
-            <h4 style="margin-top:20px;">Top 3 Titles by Downloads</h4>
-            <div class="stats-grid">
-                <?php if (empty($topDownloadedTitles)): ?>
-                    <p>No download data available.</p>
-                <?php else: ?>
-                    <?php foreach ($topDownloadedTitles as $text): ?>
-                        <div class="stats-card">
-                            <div class="stats-card-header">
-                                <?= htmlspecialchars($text['title']) ?>
-                            </div>
-                            <div class="stats-card-body">
-                                Downloads: <?= (int) $text['downloads'] ?>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
-
-            <p style="margin-top:15px;">
-                <a href="../Statistics.php" style="color: var(--clr-pop); text-decoration:none;">
-                    View full stats &raquo;
-                </a>
-            </p>
-        </div>
-    </div>
 </body>

@@ -97,7 +97,7 @@ if (isset($_POST['question_id'])) {
     </div>
     
     <div class="hide" id="rmenu" hidden>
-        <button id="delete-btn" type="button">Delete?</button>
+        <button class="btn" id="delete-btn" type="button">Delete?</button>
     </div>
 </div>
 </body>

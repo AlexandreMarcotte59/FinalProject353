@@ -24,16 +24,22 @@ $readerAlready->execute([$_SESSION['user_id'], $text_id]);
 $existingReader = $readerAlready->fetch(PDO::FETCH_ASSOC);
 
 if ($existingReader) {
-    if ($isAjax) {
-            http_response_code(403); // alert JS
-       }
-       exit; // Non-Ajax: do nothing
+        if ($isAjax) {
+                http_response_code(403);
+                if ($_SESSION['downloads_capped'] == true){
+                        http_response_code(405); exit;
+                }
+        }
+       exit; 
 }
 
 $stmt = $pdo->prepare("UPDATE Texts SET downloads = downloads + 1 WHERE text_id = ?");
 $stmt->execute([$text_id]);
 
-$stmtR = $pdo->prepare("INSERT Readers (user_id, text_id) VALUES (?,?)");
+$stmtR = $pdo->prepare("INSERT INTO Readers (user_id, text_id) VALUES (?,?)");
+$stmtR->execute([$_SESSION['user_id'], $text_id]);
+
+$stmtR = $pdo->prepare("INSERT INTO Downloads (user_id, text_id) VALUES (?,?)");
 $stmtR->execute([$_SESSION['user_id'], $text_id]);
 
 header("Content-Type: application/octet-stream");
