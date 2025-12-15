@@ -19,3 +19,10 @@ POST-DEMO CHANGES:
 - Added database triggers
 - Added local database use
 - Added faq page
+
+LOCAL ENVIRONMENT INSTALLATION INSTRUCTION:
+- Install code folder in zampp or lampp index folder // usually htdocs
+- Run apache and php local server
+- Open phpmyadmin and create an mvc353_2 database
+- Paste table.sql commands
+- Navigate to Code Folder and open Home.php
