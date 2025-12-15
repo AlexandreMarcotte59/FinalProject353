@@ -4,6 +4,7 @@ Instructor: Dr. Bipin C Desai
 Final Project - Group 11:
 
 |     ID     |          NAME        |            EMAIL           |
+|------------| -------------------- | -------------------------- |
 |  40251045  |    olgerta GJYRIQI   | o_gjyriq@encs.concordia.ca |
 |  40272336  |   theodore TREVICK   | t_trevic@encs.concordia.ca |
 |  40283929  |  alexandre MARCOTTE  | a_m42601@encs.concordia.ca |
